@@ -29,5 +29,5 @@ qodly_*.zip
 *.sw?
 
 # Env variables
-.env.*
+.env*
 !.env.example

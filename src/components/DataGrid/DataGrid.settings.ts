@@ -4,6 +4,36 @@ import { validateServerSide } from '@ws-ui/shared';
 
 const commonSettings: TSetting[] = [
   {
+    type: ESetting.SELECT,
+    label: 'Variant',
+    isClearable: false,
+    defaultValue: 'pagination',
+    options: [
+      {
+        label: 'Pagination',
+        value: 'pagination',
+      },
+      {
+        label: 'Infinite scroll',
+        value: 'infinite',
+      },
+    ],
+    key: 'variant',
+    isSearchable: false,
+  },
+  {
+    label: 'Columns visibility',
+    type: ESetting.CHECKBOX,
+    key: 'columnsVisibility',
+    defaultValue: false,
+  },
+  {
+    label: 'Filter',
+    type: ESetting.CHECKBOX,
+    key: 'filter',
+    defaultValue: true,
+  },
+  {
     label: 'Header height',
     type: ESetting.NUMBER_FIELD,
     defaultValue: 36,
@@ -17,6 +47,19 @@ const commonSettings: TSetting[] = [
     key: 'rowHeight',
     min: 1,
   },
+  {
+    label: 'Pagination size',
+    type: ESetting.SELECT,
+    defaultValue: 10,
+    key: 'paginationSize',
+    options: [
+      { label: '10', value: '10' },
+      { label: '25', value: '25' },
+      { label: '50', value: '50' },
+      { label: '100', value: '100' },
+    ],
+  },
+  { label: 'Display Footer', type: ESetting.CHECKBOX, defaultValue: true, key: 'displayFooter' },
   {
     type: ESetting.DATAGRID,
     key: 'columns',
@@ -45,10 +88,7 @@ const commonSettings: TSetting[] = [
       },
       {
         label: 'Width',
-        type: ESetting.UNITFIELD,
-        placeholder: '150',
-        hasLabel: true,
-        units: ['px', '%', 'auto'],
+        type: ESetting.NUMBER_FIELD,
         defaultValue: 150,
         key: 'width',
       },
@@ -57,6 +97,12 @@ const commonSettings: TSetting[] = [
         defaultValue: false,
         type: ESetting.CHECKBOX,
         key: 'sorting',
+      },
+      {
+        label: 'Enable Hidden',
+        defaultValue: false,
+        type: ESetting.CHECKBOX,
+        key: 'hidden',
       },
     ],
   },

@@ -15,16 +15,17 @@ import {
 } from '@ws-ui/shared';
 
 import { Settings } from '@ws-ui/webform-editor';
-import { MdTableChart } from 'react-icons/md';
+import { MdGridOn } from 'react-icons/md';
 import { capitalize, cloneDeep } from 'lodash';
 import DataGridSettings, { BasicSettings } from './DataGrid.settings';
 import { generate } from 'short-uuid';
 
 export default {
   craft: {
-    displayName: 'DataTables',
+    displayName: 'DataGrid',
     kind: EComponentKind.BASIC,
     props: {
+      iterable: true,
       name: '',
       classNames: [],
       events: [],
@@ -34,7 +35,7 @@ export default {
     },
   },
   info: {
-    displayName: 'DataTables',
+    displayName: 'DataGrid',
     sanityCheck: {
       keys: [
         { name: 'datasource', require: true, isDatasource: true },
@@ -42,7 +43,7 @@ export default {
       ],
     },
     exposed: true,
-    icon: MdTableChart,
+    icon: MdGridOn,
     events: [
       {
         label: 'On Select',
@@ -97,6 +98,7 @@ export default {
                   source: item.attribute.name,
                   width: 150,
                   sorting: false,
+                  hidden: false,
                   id: generate(),
                   ...((['bool', 'blob', 'object'] as catalog.AttributeType[]).includes(
                     item.attribute.type as catalog.AttributeType,
@@ -120,13 +122,26 @@ export default {
   defaultProps: {
     headerHeight: 36,
     rowHeight: 30,
+    paginationSize: 10,
+    displayFooter: true,
+    columnsVisibility: false,
+    filter: true,
     columns: [],
+    variant: 'pagination',
+    style: {
+      width: 'fit-content',
+    },
   },
 } as T4DComponentConfig<IDataGridProps>;
 
 export interface IDataGridProps extends webforms.ComponentProps {
+  variant?: string;
   headerHeight: number;
   rowHeight: number;
+  paginationSize: number;
+  displayFooter: boolean;
+  columnsVisibility: boolean;
+  filter: boolean;
   columns: IColumn[];
   ref?: any;
 }
@@ -135,7 +150,8 @@ export interface IColumn {
   title: string;
   source: string;
   sorting: boolean;
-  width: number | string;
+  hiding: boolean;
+  width: number;
   initialWidth?: number | string;
   format: string;
   id: string;

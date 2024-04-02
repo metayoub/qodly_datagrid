@@ -16,6 +16,10 @@ const DataGrid: FC<IDataGridProps> = ({
   datasource,
   columns = [],
   style,
+  displayFooter = true,
+  headerHeight,
+  rowHeight,
+  paginationSize = 10,
   className,
   classNames = [],
 }) => {
@@ -23,10 +27,11 @@ const DataGrid: FC<IDataGridProps> = ({
     connectors: { connect },
   } = useEnhancedNode();
 
-  const initialData = Array.from({ length: 10 }, () => {
+  const initialData = Array.from({ length: paginationSize }, () => {
     const obj = mapValues(keyBy(columns, 'source'), (value) => value.title);
     return obj;
   });
+
   const [data, setData] = useState(initialData);
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
@@ -35,6 +40,7 @@ const DataGrid: FC<IDataGridProps> = ({
       columnHelper.accessor(column.source as string, {
         header: () => column.title,
         footer: (info) => info.column.id,
+        size: column.width,
       }),
     );
 
@@ -46,21 +52,34 @@ const DataGrid: FC<IDataGridProps> = ({
 
   useEffect(() => {
     setData(initialData);
-  }, [columns]);
+  }, [columns, paginationSize]);
 
   return (
     <div ref={connect} style={style} className={cn(className, classNames)}>
       {datasource ? (
         ColumnsAux.length > 0 && data ? (
-          <table>
+          <table
+            {...{
+              style: {
+                width: table.getCenterTotalSize(),
+              },
+            }}
+          >
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    <th
+                      {...{
+                        key: header.id,
+                        colSpan: header.colSpan,
+                        style: {
+                          height: headerHeight,
+                          width: header.getSize(),
+                        },
+                      }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
                     </th>
                   ))}
                 </tr>
@@ -68,7 +87,7 @@ const DataGrid: FC<IDataGridProps> = ({
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
+                <tr key={row.id} style={{ height: rowHeight }}>
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -77,19 +96,19 @@ const DataGrid: FC<IDataGridProps> = ({
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              {table.getFooterGroups().map((footerGroup) => (
-                <tr key={footerGroup.id}>
-                  {footerGroup.headers.map((header) => (
-                    <th key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.footer, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </tfoot>
+            {displayFooter && (
+              <tfoot>
+                {table.getFooterGroups().map((footerGroup) => (
+                  <tr key={footerGroup.id}>
+                    {footerGroup.headers.map((header) => (
+                      <th key={header.id}>
+                        {flexRender(header.column.columnDef.footer, header.getContext())}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </tfoot>
+            )}
           </table>
         ) : (
           <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
