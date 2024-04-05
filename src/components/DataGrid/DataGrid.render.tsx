@@ -24,8 +24,8 @@ const DataGrid: FC<IDataGridProps> = ({
 }) => {
   const { connect } = useRenderer();
   const {
-    sources: { datasource: ds },
-  } = useSources();
+    sources: { datasource: ds, currentElement },
+  } = useSources({ acceptIteratorSel: true });
 
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
@@ -80,6 +80,7 @@ const DataGrid: FC<IDataGridProps> = ({
               filter={filter}
               datasource={ds}
               columns={ColumnsAux}
+              currentElement={currentElement}
             />
           ) : (
             <InfiniteScroll

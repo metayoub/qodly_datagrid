@@ -18,6 +18,7 @@ const DragAlongCell = ({ cell }: { cell: any }) => {
         width: cell.column.getSize(),
         zIndex: isDragging ? 1 : 0,
       }}
+      className={`td-${cell.column.id}`}
       ref={setNodeRef}
     >
       {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -7,7 +7,7 @@ const CustomCell = ({ cell, format, dataType }: { cell: any; format: any; dataTy
     return (
       <>
         {dataType === 'image' && value?.__deferred?.image ? (
-          <img className="image h-10 w-10 rounded-full" src={value?.__deferred?.uri} alt="" />
+          <img className="image h-10 w-10" src={value?.__deferred?.uri} alt="" />
         ) : (
           JSON.stringify(value)
         )}

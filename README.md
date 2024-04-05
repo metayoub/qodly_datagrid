@@ -6,8 +6,8 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 - Display Columns : done
 - Display Data & length : done
-- Sorting : on going
-- Set width : done
+- Sorting : done enable multiSorting
+- Set width : donex
 - Search in column ??
 - ReOrder : done
 - Pagination : on going

@@ -15,7 +15,7 @@ const TableHeader = ({
   columnOrder: string[];
 }) => {
   return (
-    <thead>
+    <thead className="header">
       {table.getHeaderGroups().map((headerGroup) => (
         <tr key={headerGroup.id}>
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
@@ -27,10 +27,8 @@ const TableHeader = ({
                 filter={filter}
                 table={table}
               >
-                {filter && header.column.getCanFilter() && (
-                  <div>
-                    <TableFilter column={header.column} table={table} />
-                  </div>
+                {false && filter && header.column.getCanFilter() && (
+                  <TableFilter column={header.column} table={table} />
                 )}
               </DraggableTableHeader>
             ))}

@@ -12,7 +12,7 @@ const TableBody = ({
   columnOrder: string[];
 }) => {
   return table.getRowModel().rows.map((row) => (
-    <tr key={row.id} style={{ height: rowHeight }}>
+    <tr key={row.id} style={{ height: rowHeight }} className={`tr-${row.id}`}>
       {row.getVisibleCells().map((cell) => (
         <SortableContext key={cell.id} items={columnOrder} strategy={horizontalListSortingStrategy}>
           <DragAlongCell key={cell.id} cell={cell} />

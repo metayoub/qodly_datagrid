@@ -35,7 +35,7 @@ const TablePagination = ({
           </button>
         </div>
 
-        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+        <div className="flex items-center space-x-2">
           <label>
             <select
               className="h-8 text-sm pr-8 leading-none transition duration-75 border-gray-300 rounded-lg shadow-sm outline-none"

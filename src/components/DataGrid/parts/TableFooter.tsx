@@ -4,9 +4,9 @@ import DragAlongFooter from './DragAlongFooter';
 
 const TableFooter = ({ table, columnOrder }: { table: Table<any>; columnOrder: string[] }) => {
   return (
-    <tfoot>
+    <tfoot className="footer">
       {table.getFooterGroups().map((footerGroup) => (
-        <tr key={footerGroup.id}>
+        <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
           {footerGroup.headers.map((header) => (
             <SortableContext
               key={header.id}

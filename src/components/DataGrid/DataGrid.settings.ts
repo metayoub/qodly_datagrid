@@ -27,12 +27,12 @@ const commonSettings: TSetting[] = [
     key: 'columnsVisibility',
     defaultValue: false,
   },
-  {
+  /*{
     label: 'Filter',
     type: ESetting.CHECKBOX,
     key: 'filter',
     defaultValue: true,
-  },
+  },*/
   {
     label: 'Header height',
     type: ESetting.NUMBER_FIELD,

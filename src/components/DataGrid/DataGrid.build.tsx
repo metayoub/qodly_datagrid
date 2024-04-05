@@ -65,11 +65,12 @@ const DataGrid: FC<IDataGridProps> = ({
               },
             }}
           >
-            <thead>
+            <thead className="header">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
+                      className={`th-${header.column.id}`}
                       {...{
                         key: header.id,
                         colSpan: header.colSpan,
@@ -85,7 +86,7 @@ const DataGrid: FC<IDataGridProps> = ({
                 </tr>
               ))}
             </thead>
-            <tbody>
+            <tbody className="body">
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} style={{ height: rowHeight }}>
                   {row.getVisibleCells().map((cell) => (
@@ -97,9 +98,9 @@ const DataGrid: FC<IDataGridProps> = ({
               ))}
             </tbody>
             {displayFooter && (
-              <tfoot>
+              <tfoot className="footer">
                 {table.getFooterGroups().map((footerGroup) => (
-                  <tr key={footerGroup.id}>
+                  <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
                     {footerGroup.headers.map((header) => (
                       <th key={header.id}>
                         {flexRender(header.column.columnDef.footer, header.getContext())}
