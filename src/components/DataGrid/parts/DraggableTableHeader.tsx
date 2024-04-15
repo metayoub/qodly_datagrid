@@ -45,10 +45,8 @@ const DraggableTableHeader = ({
         {...(header.column.getCanSort()
           ? { onClick: () => header.column.toggleSorting(null, true) }
           : {})}
-        {...attributes}
-        {...listeners}
       >
-        <RiDraggable className="tdrag" />
+        <RiDraggable className="tdrag" {...attributes} {...listeners} />
         {flexRender(header.column.columnDef.header, header.getContext())}
         {{ asc: <RiSortAsc />, desc: <RiSortDesc /> }[header.column.getIsSorted() as string] ??
           null}

@@ -30,6 +30,11 @@ import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter }
 } from '@ws-ui/webform-editor';*/
 
 import { isNumber } from 'lodash';
+import {
+  findIndexByRefOrValue,
+  getParentEntitySel,
+  updateEntity,
+} from '../hooks/useDsChangeHandler';
 
 const Pagination = ({
   paginationSize,
@@ -65,7 +70,7 @@ const Pagination = ({
     columns.map((column) => column.id as string),
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selection, setSelection] = useState({ selectedIndex: -1, selectedPage: -1 });
 
   // Create the table and pass your options
   const table = useReactTable({
@@ -149,8 +154,9 @@ const Pagination = ({
     if (!currentElement) {
       return;
     }
-    console.log('currentDsChangeHandler', currentElement);
-    /*switch (currentElement.type) {
+    console.log('currentElement', currentElement);
+
+    switch (currentElement.type) {
       case 'entity': {
         const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
         const entity = (currentElement as any).getEntity();
@@ -161,11 +167,11 @@ const Pagination = ({
             currentIndex = await parent.findElementPosition(currentElement);
           }
           if (typeof currentIndex === 'number') {
-            setSelectedIndex(currentIndex);
-            // refreshItem(currentIndex);
+            selectIndex(currentIndex);
+            //refreshItem(currentIndex); // TODO
           }
         } else {
-          setSelectedIndex(-1);
+          selectIndex(-1);
         }
         break;
       }
@@ -177,14 +183,14 @@ const Pagination = ({
         const value = await currentElement.getValue();
         const currentIndex = findIndexByRefOrValue(items, value);
         if (currentIndex >= 0) {
-          setSelectedIndex(currentIndex);
+          selectIndex(currentIndex);
         } else {
-          setSelectedIndex(-1);
+          selectIndex(-1);
         }
         break;
       }
-    }*/
-  }, [currentElement]);
+    }
+  }, [currentElement, loader]);
 
   const updateCurrentDsValue = async ({
     index,
@@ -195,8 +201,7 @@ const Pagination = ({
     forceUpdate?: boolean;
     fireEvent?: boolean;
   }) => {
-    console.log('updateCurrentDsValue', index, forceUpdate, fireEvent);
-    /*if (!datasource || !currentElement || (selectedIndex === index && !forceUpdate)) {
+    if (!datasource || !currentElement || (selection.selectedIndex === index && !forceUpdate)) {
       return;
     }
 
@@ -213,23 +218,30 @@ const Pagination = ({
         await currentElement.setValue(null, value[index], fireEvent);
         break;
       }
-    }*/
+    }
+  };
+  const selectIndex = (index: number) => {
+    // TODO: pagination
+    setSelection((prev) => {
+      if (prev.selectedPage !== currentPage) {
+        return { selectedIndex: index, selectedPage: currentPage };
+      } else {
+        return { ...prev, selectedIndex: index };
+      }
+    });
   };
 
   useEffect(() => {
     if (!loader || !datasource) {
       return;
     }
-    if (currentElement) {
-      currentElement.addListener('changed', currentDsChangeHandler);
-    }
-    console.log('useEffect', selectedIndex);
+
     const dsListener = () => {
       loader.sourceHasChanged().then(() => {
         updateFromLoader();
-        if (isNumber(selectedIndex) && selectedIndex > -1) {
+        if (isNumber(selection.selectedIndex) && selection.selectedIndex > -1) {
           updateCurrentDsValue({
-            index: selectedIndex,
+            index: selection.selectedIndex,
             forceUpdate: true,
           });
         }
@@ -237,34 +249,20 @@ const Pagination = ({
     };
     datasource.addListener('changed', dsListener);
     return () => {
-      currentElement?.removeListener('changed', currentDsChangeHandler);
-      datasource?.removeListener('changed', dsListener);
+      datasource.removeListener('changed', dsListener);
     };
-  }, [selectedIndex]);
+  }, [selection]);
 
   useEffect(() => {
-    // select current element
-    console.log('useEffect 2', currentElement, selectedIndex);
-    if (currentElement && selectedIndex === -1) {
-      try {
-        let index = -1;
-        if (currentElement.type === 'entity') {
-          index = (currentElement as any).getEntity()?.getPos();
-        } else if (
-          currentElement.type === 'scalar' &&
-          currentElement.dataType === 'object' &&
-          currentElement.parentSource
-        ) {
-          index = (currentElement as any).getPos();
-        }
-        if (index >= 0) {
-          setSelectedIndex(index);
-        }
-      } catch (e) {
-        // proceed
-      }
+    if (!currentElement) {
+      return;
     }
-  }, []);
+
+    currentElement.addListener('changed', currentDsChangeHandler);
+    return () => {
+      currentElement.removeListener('changed', currentDsChangeHandler);
+    };
+  }, [currentDsChangeHandler]);
 
   return (
     <DndContext
@@ -289,7 +287,18 @@ const Pagination = ({
               </td>
             </tr>
           ) : (
-            <TableBody table={table} rowHeight={rowHeight} columnOrder={columnOrder} />
+            <TableBody
+              table={table}
+              rowHeight={rowHeight}
+              columnOrder={columnOrder}
+              onRowClick={async (row) => {
+                await updateCurrentDsValue({ index: row.index + pageSize * (currentPage - 1) });
+                //emit('onselect'); // TODO
+                selectIndex(row.index);
+              }}
+              page={currentPage}
+              selection={selection}
+            />
           )}
         </tbody>
         {displayFooter && <TableFooter table={table} columnOrder={columnOrder} />}
