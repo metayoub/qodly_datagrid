@@ -91,6 +91,7 @@ const DataGrid: FC<IDataGridProps> = ({
               headerHeight={headerHeight}
               filter={filter}
               loader={loader}
+              currentElement={currentElement}
             />
           )}
         </>

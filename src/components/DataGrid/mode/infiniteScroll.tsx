@@ -23,6 +23,13 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
 import { TableVisibility, TableHeader, TableBody } from '../parts';
+
+import {
+  findIndexByRefOrValue,
+  getParentEntitySel,
+  updateEntity,
+} from '../hooks/useDsChangeHandler';
+
 interface Data {
   length: number;
   list: datasources.IEntity[];
@@ -38,6 +45,7 @@ const InfiniteScroll = ({
   headerHeight,
   filter,
   loader,
+  currentElement,
 }: {
   columns: ColumnDef<any, any>[];
   datasource: datasources.DataSource;
@@ -46,6 +54,7 @@ const InfiniteScroll = ({
   headerHeight: number;
   filter: boolean;
   loader: DataLoader;
+  currentElement: datasources.DataSource;
 }) => {
   const [data, setData] = useState<Data>({ length: 0, list: [], start: 0, end: 0 });
   // const [data, setData] = useState<datasources.IEntity[]>([]);
@@ -56,6 +65,7 @@ const InfiniteScroll = ({
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
 
   // Create the table and pass your options
   const table = useReactTable({
@@ -78,6 +88,40 @@ const InfiniteScroll = ({
       columnFilters,
     },
   });
+
+  const updateCurrentDsValue = async ({
+    index,
+    forceUpdate = false,
+    fireEvent = true,
+  }: {
+    index: number;
+    forceUpdate?: boolean;
+    fireEvent?: boolean;
+  }) => {
+    if (!datasource || !currentElement || (selectedIndex === index && !forceUpdate)) {
+      return;
+    }
+
+    switch (currentElement.type) {
+      case 'entity': {
+        await updateEntity({ index, datasource, currentElement, fireEvent });
+        break;
+      }
+      case 'scalar': {
+        if (datasource.dataType !== 'array') {
+          return;
+        }
+        const value = await datasource.getValue();
+        await currentElement.setValue(null, value[index], fireEvent);
+        break;
+      }
+    }
+  };
+
+  const selectIndex = (index: number) => {
+    // TODO: pagination
+    setSelectedIndex(index);
+  };
 
   /*const refreshItem = debounce(async (index: number) => {
     if (!loader) return;
@@ -181,7 +225,18 @@ const InfiniteScroll = ({
               </td>
             </tr>
           ) : (
-            <TableBody table={table} rowHeight={rowHeight} columnOrder={columnOrder} />
+            <TableBody
+              table={table}
+              rowHeight={rowHeight}
+              columnOrder={columnOrder}
+              onRowClick={async (row) => {
+                await updateCurrentDsValue({ index: row.index });
+                //emit('onselect'); // TODO
+                selectIndex(row.index);
+              }}
+              page={0}
+              selection={selectedIndex}
+            />
           )}
         </tbody>
       </table>

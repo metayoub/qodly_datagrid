@@ -127,7 +127,7 @@ export default {
     columnsVisibility: false,
     filter: true,
     columns: [],
-    variant: 'pagination',
+    variant: 'infinite',
     style: {
       width: 'fit-content',
     },
@@ -160,5 +160,5 @@ export interface IColumn {
 export interface IExostiveElementProps extends webforms.ComponentProps {
   columns: IColumn[];
   text: string;
-  variant: string;
+  variant: 'pagination' | 'infinite';
 }
