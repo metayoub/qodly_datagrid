@@ -23,13 +23,7 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
-/*import {
-  updateEntity,
-  getParentEntitySel,
-  findIndexByRefOrValue,
-} from '@ws-ui/webform-editor';*/
 
-import { isNumber } from 'lodash';
 import {
   findIndexByRefOrValue,
   getParentEntitySel,
@@ -142,20 +136,68 @@ const Pagination = ({
           .join(',');
         await datasource.orderBy(sortingString);
       }
-      loader.fetchPage((currentPage - 1) * pageSize, currentPage * pageSize).then(updateFromLoader);
+      // TODO: calculate the new position of the selected element and fetch the page with the new position
+
+      await loader
+        .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
+        .then(updateFromLoader);
+      await currentDsNewPosition();
     };
 
     setLoading(true);
     updateDataFromSorting();
   }, [currentPage, pageSize, sorting]);
 
+  // calcul the new position of the selected element
+  const currentDsNewPosition = async () => {
+    if (!currentElement) {
+      return;
+    }
+    switch (currentElement.type) {
+      case 'entity': {
+        const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
+        let currentIndex = await parent.findElementPosition(currentElement);
+        console.log('0', currentIndex);
+
+        /*const entity = await (currentElement as any).getEntity();
+        if (entity) {
+          let currentIndex = entity.getPos();
+          console.log('currentIndex', currentIndex);
+          if (currentIndex == null && parent) {
+            // used "==" to handle both null & undefined values
+            currentIndex = await parent.findElementPosition(currentElement);
+            console.log('currentIndex2', currentIndex);
+          }
+          if (typeof currentIndex === 'number') {
+            // selectIndex(currentIndex);
+            //refreshItem(currentIndex); // TODO
+          }
+        } else {
+          selectIndex(-1);
+        }*/
+        break;
+      }
+      case 'scalar': {
+        if (!datasource || datasource.dataType !== 'array') {
+          return;
+        }
+        const items = await datasource.getValue();
+        const value = await currentElement.getValue();
+        const currentIndex = findIndexByRefOrValue(items, value);
+        if (currentIndex >= 0) {
+          selectIndex(currentIndex);
+        } else {
+          selectIndex(-1);
+        }
+        break;
+      }
+    }
+  };
   // handle selelctElement
   const currentDsChangeHandler = useCallback(async () => {
     if (!currentElement) {
       return;
     }
-    console.log('currentElement', currentElement);
-
     switch (currentElement.type) {
       case 'entity': {
         const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
@@ -230,28 +272,6 @@ const Pagination = ({
       }
     });
   };
-
-  useEffect(() => {
-    if (!loader || !datasource) {
-      return;
-    }
-
-    const dsListener = () => {
-      loader.sourceHasChanged().then(() => {
-        updateFromLoader();
-        if (isNumber(selection.selectedIndex) && selection.selectedIndex > -1) {
-          updateCurrentDsValue({
-            index: selection.selectedIndex,
-            forceUpdate: true,
-          });
-        }
-      });
-    };
-    datasource.addListener('changed', dsListener);
-    return () => {
-      datasource.removeListener('changed', dsListener);
-    };
-  }, [selection]);
 
   useEffect(() => {
     if (!currentElement) {
