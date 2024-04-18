@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useRef } from 'react';
+import { useEffect, useCallback, useState, useRef, useMemo } from 'react';
 import {
   getCoreRowModel,
   SortingState,
@@ -26,14 +26,12 @@ import { DataLoader } from '@ws-ui/webform-editor';
 import { TableVisibility, TableHeader, TableBodyScroll } from '../parts';
 
 import { updateEntity } from '../hooks/useDsChangeHandler';
-import { useVirtualizer, VirtualizerOptions } from '@tanstack/react-virtual';
+import { useVirtualizer } from '@tanstack/react-virtual';
 
-import { ceil, debounce } from 'lodash';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
 
 interface Data {
   length: number;
-  list: datasources.IEntity[];
   start: number;
   end: number;
 }
@@ -64,8 +62,8 @@ const InfiniteScroll = ({
   //we need a reference to the scrolling element for logic down below
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
-  const [data, setData] = useState<Data>({ length: 0, list: [], start: 0, end: 0 });
-
+  const [data, setData] = useState<Data>({ length: 0, start: 0, end: 0 });
+  const [dataToDisplay, setDataToDisplay] = useState<datasources.IEntity[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
@@ -77,7 +75,7 @@ const InfiniteScroll = ({
 
   // Create the table and pass your options
   const table = useReactTable({
-    data: data.list,
+    data: dataToDisplay,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualSorting: true,
@@ -96,6 +94,7 @@ const InfiniteScroll = ({
     },
   });
 
+  const pageSize = useMemo(() => (datasource as any).pageSize, [datasource]);
   //scroll to top of table when sorting changes
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting(updater);
@@ -110,8 +109,10 @@ const InfiniteScroll = ({
     onSortingChange: handleSortingChange,
   }));
 
-  const opts = {
-    count: data.length,
+  const { rows } = table.getRowModel();
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
     estimateSize: () => rowHeight, //estimate row height for accurate scrollbar dragging
     getScrollElement: () => tableContainerRef.current,
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
@@ -120,15 +121,7 @@ const InfiniteScroll = ({
         ? (element: any) => element?.getBoundingClientRect().height
         : undefined,
     overscan: 10,
-    /*scrollToFn: () => {},
-    observeElementRect: (element: any) => {
-      console.log('observeElementRect', element);
-    },
-    observeElementOffset: (element: any) => {
-      console.log('observeElementOffset', element);
-    },*/
-  };
-  const rowVirtualizer = useVirtualizer(opts);
+  });
 
   // TODO: check why is not working
   const updateCurrentDsValue = async ({
@@ -146,7 +139,7 @@ const InfiniteScroll = ({
 
     switch (currentElement.type) {
       case 'entity': {
-        const key = index + data.start;
+        const key = index;
         await updateEntity({ index: key, datasource, currentElement, fireEvent });
         break;
       }
@@ -162,16 +155,15 @@ const InfiniteScroll = ({
   };
 
   // TODO: to be tested
-  const fetchItem = debounce((index: number) => {
+  const fetchItems = (start: number) => {
     if (!loader) {
       return;
     }
-    const size = ceil((datasource as any).pageSize / 2);
 
-    const start = index > size ? index - size : 0;
-    const end = index + size < loader.length ? index + size : loader.length;
+    const end = start + pageSize < loader.length ? start + pageSize : loader.length;
+    setLoading(true);
     loader.fetchPage(start, end).then(updateFromLoader);
-  }, 50);
+  };
 
   /*const refreshItem = debounce(async (index: number) => {
     if (!loader) return;
@@ -206,20 +198,16 @@ const InfiniteScroll = ({
     if (!loader) {
       return;
     }
-    console.log('updateFromLoader', loader);
+
+    setDataToDisplay((prev) => {
+      return [...prev, ...loader.page];
+    });
     setData({
       length: loader.length,
-      list: loader.page,
       start: loader.start,
       end: loader.end,
     });
     setLoading(false);
-    console.log('data', data);
-    const updatedOptions: VirtualizerOptions<HTMLDivElement, Element> = {
-      ...opts, // Assuming opts is the current options object
-      count: data.length,
-    };
-    rowVirtualizer.setOptions(updatedOptions);
   }, [loader]);
 
   useEffect(() => {
@@ -234,10 +222,10 @@ const InfiniteScroll = ({
         .then((value: any) => {
           setData({
             length: value._private.selLength,
-            list: value._private.curPage.entitiesDef,
             start: value._private.curPage.first,
             end: value._private.curPage.first + value._private.curPage.size,
           });
+          setDataToDisplay(value._private.curPage.entitiesDef);
           setLoading(false);
         });
       // TODO: Select the first Element
@@ -258,18 +246,19 @@ const InfiniteScroll = ({
 
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
   const fetchMoreOnBottomReached = useCallback(
-    (containerRefElement?: HTMLDivElement | null) => {
+    async (containerRefElement?: HTMLDivElement | null) => {
       if (containerRefElement) {
-        const { scrollHeight, scrollTop, clientHeight, offsetHeight } = containerRefElement;
-        console.log('containerRefElement', scrollHeight, scrollTop, clientHeight, offsetHeight);
-        //once the user has scrolled within 500px of the bottom of the table, fetch more data if we can
-        console.log('data', data);
-        if (scrollHeight - scrollTop - clientHeight < 500 && data.end - data.start < data.length) {
-          fetchItem(data.end - 1);
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+        if (
+          !loading &&
+          scrollHeight - scrollTop - clientHeight < 500 &&
+          data.end - data.start - 1 < pageSize
+        ) {
+          await fetchItems(data.end);
         }
       }
     },
-    [data],
+    [data, pageSize, loading],
   );
 
   return (
