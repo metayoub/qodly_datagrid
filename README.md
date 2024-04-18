@@ -2,26 +2,40 @@
 
 DataGrid's Qodly component using [react-table](https://github.com/TanStack/table)
 
+## Featurees
+
+|                                        | DataGrid | DataTable |
+| -------------------------------------- | -------- | --------- |
+| Customizable columns                   | ✔️       |           |
+| Sorting                                | ✔️       | ✔️        |
+| Filtering                              | ✔️       |           |
+| ReOrder                                | ✔️       | ✔️        |
+| Infinite scrolling (Virtual scrolling) | ✔️       | ✔️        |
+| Pagination                             | ✔️       | ✔️        |
+| Sticky Header                          | ✔️       | ✔️        |
+| Resizing                               | ✔️       | ✔️        |
+| AutoFit                                |          |           |
+| Styling and themes (using CSS)         | ✔️       | ✔️        |
+| Editable cells                         |          |           |
+| Stacked Header                         |          |           |
+| AutoWrap columns cells                 |          |           |
+| Column Chooser                         | ✔️       |           |
+| Hide & show                            | ✔️       |           |
+| Grouping By                            |          |           |
+| Export                                 |          |           |
+
 ## TODO:
 
-- Display Columns : done
-- Display Data & length : done
-- Sorting : done enable multiSorting
-- Set width : donex
-- Search in column ??
-- ReOrder : done
-- Pagination : on going
+- Selecte Element
+- Search in column : On going
 - AutoFIt : ??
-- Resize : done
 - Customizable columns (display picture, display slider.) : picture done, slider ??
 - Styling (CSS)
-- Editable cells
-- Stacked Header
-- Column chooser : on going
+- Editable cells : working on it
+- Stacked Header: ??
 - Save State ??
-- Export
+- Export ??
 - Add events: on click, on select ...
-- infinite scroll ?
 
 ## Styling
 
