@@ -22,7 +22,7 @@ const TableBody = ({
     <tr
       key={row.id}
       style={{ height: rowHeight }}
-      className={cn(`tr-${row.id}`, {
+      className={cn(`flex tr-${row.id}`, {
         selected: selection.selectedIndex === row.index && selection.selectedPage === page,
         'bg-cyan-200': selection.selectedIndex === row.index && selection.selectedPage === page,
       })}

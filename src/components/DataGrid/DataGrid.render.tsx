@@ -22,7 +22,7 @@ const DataGrid: FC<IDataGridProps> = ({
   className,
   classNames = [],
 }) => {
-  const { connect } = useRenderer();
+  const { connect, emit } = useRenderer();
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
@@ -81,9 +81,11 @@ const DataGrid: FC<IDataGridProps> = ({
               datasource={ds}
               columns={ColumnsAux}
               currentElement={currentElement}
+              emit={emit}
             />
           ) : (
             <InfiniteScroll
+              height={style?.height}
               datasource={ds}
               columns={ColumnsAux}
               columnsVisibility={columnsVisibility}
@@ -92,6 +94,7 @@ const DataGrid: FC<IDataGridProps> = ({
               filter={filter}
               loader={loader}
               currentElement={currentElement}
+              emit={emit}
             />
           )}
         </>

@@ -10,9 +10,9 @@ const DragAlongFooter = ({ header }: { header: any }) => {
 
   return (
     <th
+      className={`th-${header.column.id} relative`}
       style={{
         opacity: isDragging ? 0.8 : 1,
-        position: 'relative',
         transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
         transition: 'width transform 0.2s ease-in-out',
         width: header.column.getSize(),

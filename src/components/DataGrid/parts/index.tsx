@@ -8,3 +8,4 @@ export { default as DragAlongCell } from './DragAlongCell';
 export { default as DragAlongFooter } from './DragAlongFooter';
 export { default as DraggableTableHeader } from './DraggableTableHeader';
 export { default as CustomCell } from './CustomCell';
+export { default as TableBodyScroll } from './TableBodyScroll';

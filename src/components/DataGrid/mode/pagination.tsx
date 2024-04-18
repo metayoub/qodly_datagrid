@@ -23,7 +23,7 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
-
+import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
 import {
   findIndexByRefOrValue,
   getParentEntitySel,
@@ -41,6 +41,7 @@ const Pagination = ({
   columns,
   loader,
   currentElement,
+  emit,
 }: {
   paginationSize: number;
   displayFooter: boolean;
@@ -52,6 +53,7 @@ const Pagination = ({
   currentElement: datasources.DataSource;
   columns: ColumnDef<any, any>[];
   loader: DataLoader;
+  emit: TEmit;
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
@@ -313,7 +315,7 @@ const Pagination = ({
               columnOrder={columnOrder}
               onRowClick={async (row) => {
                 await updateCurrentDsValue({ index: row.index + pageSize * (currentPage - 1) });
-                //emit('onselect'); // TODO
+                emit('onselect'); // TODO
                 selectIndex(row.index);
               }}
               page={currentPage}

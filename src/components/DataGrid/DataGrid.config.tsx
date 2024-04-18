@@ -130,6 +130,7 @@ export default {
     variant: 'infinite',
     style: {
       width: 'fit-content',
+      height: '600px',
     },
   },
 } as T4DComponentConfig<IDataGridProps>;

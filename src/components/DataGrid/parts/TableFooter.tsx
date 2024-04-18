@@ -6,7 +6,7 @@ const TableFooter = ({ table, columnOrder }: { table: Table<any>; columnOrder: s
   return (
     <tfoot className="footer">
       {table.getFooterGroups().map((footerGroup) => (
-        <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
+        <tr key={footerGroup.id} className={`flex tf-${footerGroup.id}`}>
           {footerGroup.headers.map((header) => (
             <SortableContext
               key={header.id}

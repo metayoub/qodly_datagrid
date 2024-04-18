@@ -25,16 +25,14 @@ const DraggableTableHeader = ({
     <th
       key={header.id}
       colSpan={header.colSpan}
-      className={`th-${header.column.id}`}
+      className={`th-${header.column.id} flex relative whitespace-nowrap`}
       style={{
         width: header.column.getSize(),
-        position: 'relative',
         height: headerHeight,
         zIndex: isDragging ? 1 : 0,
         opacity: isDragging ? 0.8 : 1,
         transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing
         transition: 'width transform 0.2s ease-in-out',
-        whiteSpace: 'nowrap',
       }}
       ref={setNodeRef}
     >

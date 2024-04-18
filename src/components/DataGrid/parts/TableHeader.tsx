@@ -8,16 +8,18 @@ const TableHeader = ({
   headerHeight,
   filter,
   columnOrder,
+  infinite = false,
 }: {
   table: Table<any>;
   headerHeight: number;
   filter: boolean;
   columnOrder: string[];
+  infinite?: boolean;
 }) => {
   return (
-    <thead className="header">
+    <thead className={`header grid ${infinite && 'sticky top-0 z-10'}`}>
       {table.getHeaderGroups().map((headerGroup) => (
-        <tr key={headerGroup.id}>
+        <tr key={headerGroup.id} className="flex w-full">
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
               <DraggableTableHeader
