@@ -11,7 +11,7 @@ import { IColumn, IDataGridProps } from './DataGrid.config';
 import './DataGrid.css';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import { keyBy, mapValues } from 'lodash';
-
+import { TableVisibility } from './parts';
 const DataGrid: FC<IDataGridProps> = ({
   datasource,
   columns = [],
@@ -23,6 +23,7 @@ const DataGrid: FC<IDataGridProps> = ({
   paginationSize = 10,
   className,
   classNames = [],
+  columnsVisibility,
 }) => {
   const {
     connectors: { connect },
@@ -57,6 +58,7 @@ const DataGrid: FC<IDataGridProps> = ({
 
   return (
     <div ref={connect} style={style} className={cn(className, classNames)}>
+      {columnsVisibility && <TableVisibility table={table} disabled={true} />}
       {datasource ? (
         ColumnsAux.length > 0 && data ? (
           <table
