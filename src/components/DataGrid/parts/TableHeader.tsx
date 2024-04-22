@@ -17,7 +17,7 @@ const TableHeader = ({
   infinite?: boolean;
 }) => {
   return (
-    <thead className={`header grid ${infinite && 'sticky top-0 z-10'}`}>
+    <thead className={`header grid ${infinite && 'sticky top-0 z-10'} bg-gray-50`}>
       {table.getHeaderGroups().map((headerGroup) => (
         <tr key={headerGroup.id} className="flex w-full">
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>

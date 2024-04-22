@@ -34,7 +34,7 @@ const DataGrid: FC<IDataGridProps> = ({
       columnHelper.accessor(column.source as string, {
         id: column.source,
         header: () => column.title,
-        footer: (info) => info.column.id,
+        footer: () => column.title,
         enableSorting: column.sorting,
         enableHiding: column.hiding, // TODO
         cell: (props) => (

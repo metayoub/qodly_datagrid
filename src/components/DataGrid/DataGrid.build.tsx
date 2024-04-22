@@ -17,6 +17,7 @@ const DataGrid: FC<IDataGridProps> = ({
   columns = [],
   style,
   displayFooter = true,
+  variant = 'pagination',
   headerHeight,
   rowHeight,
   paginationSize = 10,
@@ -39,7 +40,7 @@ const DataGrid: FC<IDataGridProps> = ({
     .map((column: IColumn) =>
       columnHelper.accessor(column.source as string, {
         header: () => column.title,
-        footer: (info) => info.column.id,
+        footer: () => column.title,
         size: column.width,
       }),
     );
@@ -70,7 +71,7 @@ const DataGrid: FC<IDataGridProps> = ({
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
-                      className={`th-${header.column.id}`}
+                      className={`th-${header.column.id} text-left`}
                       {...{
                         key: header.id,
                         colSpan: header.colSpan,
@@ -90,17 +91,17 @@ const DataGrid: FC<IDataGridProps> = ({
               {table.getRowModel().rows.map((row) => (
                 <tr key={row.id} style={{ height: rowHeight }}>
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
+                    <td key={cell.id} className={`td-${cell.column.id}`}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
               ))}
             </tbody>
-            {displayFooter && (
+            {variant === 'pagination' && displayFooter && (
               <tfoot className="footer">
                 {table.getFooterGroups().map((footerGroup) => (
-                  <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
+                  <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>
                     {footerGroup.headers.map((header) => (
                       <th key={header.id}>
                         {flexRender(header.column.columnDef.footer, header.getContext())}

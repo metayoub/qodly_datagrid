@@ -4,7 +4,7 @@ import DragAlongFooter from './DragAlongFooter';
 
 const TableFooter = ({ table, columnOrder }: { table: Table<any>; columnOrder: string[] }) => {
   return (
-    <tfoot className="footer">
+    <tfoot className="footer text-left">
       {table.getFooterGroups().map((footerGroup) => (
         <tr key={footerGroup.id} className={`flex tf-${footerGroup.id}`}>
           {footerGroup.headers.map((header) => (
