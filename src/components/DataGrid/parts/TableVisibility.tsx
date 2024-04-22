@@ -23,7 +23,7 @@ const TableVisibility = ({ table, disabled }: { table: Table<any>; disabled?: bo
         </div>
         {show && (
           <div
-            className="absolute right-0 z-10 w-56 origin-top-right rounded-md bg-white ring-1 ring-inset ring-gray-300 divide-y divide-gray-300 mt-2"
+            className="absolute right-0 z-20 w-56 origin-top-right rounded-md bg-white ring-1 ring-inset ring-gray-300 divide-y divide-gray-300 mt-2"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="menu-button"
