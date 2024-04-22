@@ -29,12 +29,27 @@ const DataGrid: FC<IDataGridProps> = ({
     connectors: { connect },
   } = useEnhancedNode();
 
-  const initialData = Array.from({ length: paginationSize }, () => {
-    const obj = mapValues(keyBy(columns, 'source'), (value) => value.title);
-    return obj;
-  });
+  const calculateHeight = (height: string | number | undefined): number => {
+    /* make it dynamic for inifinite scroll*/
+    if (height === undefined) {
+      return 600;
+    }
+    if (typeof height === 'number') {
+      return 600;
+    }
 
-  const [data, setData] = useState(initialData);
+    if (height.includes('px')) {
+      const value = parseInt(height.replace('px', '')) - headerHeight;
+      return value / rowHeight;
+    } else if (height.includes('%')) {
+      const value = (divElement?.clientHeight || 600) - headerHeight;
+      return value / rowHeight;
+    }
+
+    return 600;
+  };
+
+  const [data, setData] = useState<any>([]);
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
     .filter((column) => column.source !== '')
@@ -45,6 +60,20 @@ const DataGrid: FC<IDataGridProps> = ({
         size: column.width,
       }),
     );
+  const [divElement, setDivElement] = useState<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const initialData = Array.from(
+      {
+        length: variant === 'pagination' ? paginationSize : calculateHeight(style?.height),
+      },
+      () => {
+        const obj = mapValues(keyBy(columns, 'source'), (value) => value.title);
+        return obj;
+      },
+    );
+    setData(initialData);
+  }, [style?.height, columns, paginationSize, variant, divElement]);
 
   const table = useReactTable({
     data,
@@ -52,12 +81,18 @@ const DataGrid: FC<IDataGridProps> = ({
     getCoreRowModel: getCoreRowModel(),
   });
 
-  useEffect(() => {
-    setData(initialData);
-  }, [columns, paginationSize]);
-
   return (
-    <div ref={connect} style={style} className={cn(className, classNames)}>
+    <div
+      ref={(e) => {
+        connect(e);
+        setDivElement(e);
+      }}
+      style={{
+        width: style?.width,
+        height: variant === 'pagination' ? 'fit-content' : style?.height,
+      }}
+      className={cn(className, classNames)}
+    >
       {columnsVisibility && <TableVisibility table={table} disabled={true} />}
       {datasource ? (
         ColumnsAux.length > 0 && data ? (
@@ -68,7 +103,7 @@ const DataGrid: FC<IDataGridProps> = ({
               },
             }}
           >
-            <thead className="header">
+            <thead className="header bg-gray-50">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (

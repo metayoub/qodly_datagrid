@@ -6,7 +6,7 @@ import { MdKeyboardArrowDown } from 'react-icons/md';
 const TableVisibility = ({ table, disabled }: { table: Table<any>; disabled?: boolean }) => {
   const [show, setShow] = useState(false);
   return (
-    <div className="flex justify-end">
+    <div className="flex justify-end mb-2">
       <div className="relative">
         <div className="">
           <button
