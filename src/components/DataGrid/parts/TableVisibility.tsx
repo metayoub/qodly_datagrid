@@ -6,13 +6,13 @@ import { MdKeyboardArrowDown } from 'react-icons/md';
 const TableVisibility = ({ table, disabled }: { table: Table<any>; disabled?: boolean }) => {
   const [show, setShow] = useState(false);
   return (
-    <div className="flex justify-end mb-2">
+    <div className="flex justify-end mb-2 visibility-menu">
       <div className="relative">
         <div className="">
           <button
             type="button"
             onClick={() => !disabled && setShow(!show)}
-            className="inline-flex w-full justify-center rounded-md bg-white p-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300"
+            className="visibility-button inline-flex w-full justify-center rounded-md bg-white p-2 text-sm font-semibold text-gray-900 border border-gray-300"
             id="menu-button"
             aria-expanded="true"
             aria-haspopup="true"
@@ -42,10 +42,12 @@ const TableVisibility = ({ table, disabled }: { table: Table<any>; disabled?: bo
               />
               <label
                 className={cn(
+                  `${table.getIsAllColumnsVisible() ? 'visibility-menu-button' : 'visibility-menu-button-checked'}`,
                   'inline-flex w-full items-center justify-between w-auto p-2 font-medium rounded-md cursor-pointer',
                   {
                     'bg-gray-500 text-white font-semibold underline':
                       table.getIsAllColumnsVisible(),
+                    'border border-gray-500': !table.getIsAllColumnsVisible(),
                   },
                 )}
               >
@@ -71,10 +73,12 @@ const TableVisibility = ({ table, disabled }: { table: Table<any>; disabled?: bo
                     />
                     <label
                       className={cn(
+                        `${column.getIsVisible() ? 'visibility-menu-button' : 'visibility-menu-button-checked'}`,
                         'inline-flex w-full items-center justify-between w-auto p-2 font-medium rounded-md cursor-pointer',
 
                         {
                           'bg-gray-500 text-white font-semibold underline': column.getIsVisible(),
+                          'border border-gray-500': !column.getIsVisible(),
                         },
                       )}
                     >

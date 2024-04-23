@@ -66,7 +66,14 @@ const DataGrid: FC<IDataGridProps> = ({
   }, [ds, columns]);*/
 
   return (
-    <div ref={connect} style={style} className={cn(className, classNames)}>
+    <div
+      ref={connect}
+      style={{
+        ...style,
+        height: variant === 'pagination' ? 'fit-content' : style?.height,
+      }}
+      className={cn(className, classNames)}
+    >
       {loader ? (
         <>
           {variant === 'pagination' ? (

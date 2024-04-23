@@ -26,16 +26,16 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 ## TODO:
 
-- Selecte Element
+- Support Relations
+- Selected Element
 - Search in column : On going
-- AutoFIt : ??
-- Customizable columns (display picture, display slider.) : picture done, slider ??
-- Styling (CSS)
-- Editable cells : working on it
-- Stacked Header: ??
-- Save State ??
-- Export ??
+- AutoFIt : need POC
+- Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ?
+- Styling (CSS) : On going
+- Editable cells : need POC
+- Save State : need POC
 - Add events: on click, on select ...
+- Remove Unnecessary properties
 
 ## Styling
 
@@ -70,6 +70,17 @@ self tr:nth-child(even).selected {
 
 self tr:nth-child(even) {
   background-color: #f2f2f2;
+}
+
+self .visibility-menu-button {
+	background-color: #005689;
+  color: white;
+}
+
+self .visibility-menu-button-checked,
+self .visibility-button{
+	border-color: #005689;
+	color: #005689;
 }
 
 ```

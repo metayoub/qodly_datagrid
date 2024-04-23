@@ -39,10 +39,11 @@ const DataGrid: FC<IDataGridProps> = ({
     }
 
     if (height.includes('px')) {
-      const value = parseInt(height.replace('px', '')) - headerHeight;
+      const value =
+        parseInt(height.replace('px', '')) - headerHeight - (columnsVisibility ? 40 : 0);
       return value / rowHeight;
     } else if (height.includes('%')) {
-      const value = (divElement?.clientHeight || 600) - headerHeight;
+      const value = (divElement?.clientHeight || 600) - headerHeight - (columnsVisibility ? 40 : 0);
       return value / rowHeight;
     }
 
@@ -88,7 +89,7 @@ const DataGrid: FC<IDataGridProps> = ({
         setDivElement(e);
       }}
       style={{
-        width: style?.width,
+        ...style,
         height: variant === 'pagination' ? 'fit-content' : style?.height,
       }}
       className={cn(className, classNames)}
