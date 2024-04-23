@@ -38,9 +38,17 @@ const DataGrid: FC<IDataGridProps> = ({
         enableSorting: column.sorting,
         enableHiding: column.hiding, // TODO
         cell: (props) => {
+          if (column.source.includes('.')) {
+            const nestedProperties = column.source.split('.');
+            let value = props.row.original;
+            nestedProperties.forEach((property) => {
+              value = props.row.original[column.source] || value[property];
+            });
+            return <CustomCell value={value} format={column.format} dataType={column.dataType} />;
+          }
           return (
             <CustomCell
-              value={props.row.original[column.source]}
+              value={props.getValue()}
               format={column.format}
               dataType={column.dataType}
             />

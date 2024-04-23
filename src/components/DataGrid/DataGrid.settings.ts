@@ -99,8 +99,8 @@ const commonSettings: TSetting[] = [
         key: 'sorting',
       },
       {
-        label: 'Enable Hidden',
-        defaultValue: false,
+        label: 'Enable Hiding',
+        defaultValue: true,
         type: ESetting.CHECKBOX,
         key: 'hidden',
       },
