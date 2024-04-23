@@ -30,19 +30,25 @@ const DataGrid: FC<IDataGridProps> = ({
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
     .filter((column) => column.source !== '')
-    .map((column: IColumn) =>
-      columnHelper.accessor(column.source as string, {
+    .map((column: IColumn) => {
+      return columnHelper.accessor(column.source as string, {
         id: column.source,
         header: () => column.title,
         footer: () => column.title,
         enableSorting: column.sorting,
         enableHiding: column.hiding, // TODO
-        cell: (props) => (
-          <CustomCell cell={props.cell} format={column.format} dataType={column.dataType} />
-        ),
+        cell: (props) => {
+          return (
+            <CustomCell
+              value={props.row.original[column.source]}
+              format={column.format}
+              dataType={column.dataType}
+            />
+          );
+        },
         size: column.width,
-      }),
-    );
+      });
+    });
 
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {

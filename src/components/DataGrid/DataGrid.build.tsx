@@ -57,6 +57,7 @@ const DataGrid: FC<IDataGridProps> = ({
     .map((column: IColumn) =>
       columnHelper.accessor(column.source as string, {
         header: () => column.title,
+        cell: () => column.title,
         footer: () => column.title,
         size: column.width,
       }),

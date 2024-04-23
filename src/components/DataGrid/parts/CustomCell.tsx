@@ -1,8 +1,6 @@
 import { formatValue } from '@ws-ui/webform-editor';
 
-const CustomCell = ({ cell, format, dataType }: { cell: any; format: any; dataType: string }) => {
-  const value = cell.getValue();
-
+const CustomCell = ({ format, dataType, value }: { format: any; dataType: string; value: any }) => {
   if (value && typeof value === 'object' && !(value instanceof Date)) {
     return (
       <>

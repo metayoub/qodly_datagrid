@@ -26,7 +26,6 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 ## TODO:
 
-- Support Relations
 - Selected Element
 - Search in column : On going
 - AutoFIt : need POC
