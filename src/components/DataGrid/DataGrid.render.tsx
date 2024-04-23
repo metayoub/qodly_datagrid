@@ -30,13 +30,13 @@ const DataGrid: FC<IDataGridProps> = ({
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
     .filter((column) => column.source !== '')
-    .map((column: IColumn) => {
-      return columnHelper.accessor(column.source as string, {
+    .map((column: IColumn) =>
+      columnHelper.accessor(column.source as string, {
         id: column.source,
         header: () => column.title,
         footer: () => column.title,
         enableSorting: column.sorting,
-        enableHiding: column.hiding, // TODO
+        enableHiding: column.hidden ? true : false, // TODO
         cell: (props) => {
           if (column.source.includes('.')) {
             const nestedProperties = column.source.split('.');
@@ -55,8 +55,8 @@ const DataGrid: FC<IDataGridProps> = ({
           );
         },
         size: column.width,
-      });
-    });
+      }),
+    );
 
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {

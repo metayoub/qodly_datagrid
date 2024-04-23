@@ -151,7 +151,7 @@ export interface IColumn {
   title: string;
   source: string;
   sorting: boolean;
-  hiding: boolean;
+  hidden: boolean;
   width: number;
   initialWidth?: number | string;
   format: string;
