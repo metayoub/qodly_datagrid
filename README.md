@@ -29,7 +29,7 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 - Selected Element
 - Search in column : On going
 - AutoFIt : need POC
-- Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ?
+- Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ? waiting for a custom formatting
 - Styling (CSS) : On going
 - Editable cells : need POC
 - Save State : need POC

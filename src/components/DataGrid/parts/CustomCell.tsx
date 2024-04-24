@@ -1,4 +1,5 @@
 import { formatValue } from '@ws-ui/webform-editor';
+import { MdCheck, MdClose } from 'react-icons/md';
 
 const CustomCell = ({ format, dataType, value }: { format: any; dataType: string; value: any }) => {
   if (value && typeof value === 'object' && !(value instanceof Date)) {
@@ -11,6 +12,20 @@ const CustomCell = ({ format, dataType, value }: { format: any; dataType: string
         )}
       </>
     );
+  }
+
+  if (dataType === 'bool' && typeof value === 'boolean') {
+    // TODO: waiting fot formatting
+    if (format === 'checkbox') {
+      return <input type="checkbox" checked={value} disabled />;
+    }
+    return value ? <MdCheck /> : <MdClose />;
+    //return value ? 'true' : 'false';
+  }
+
+  if (dataType === 'number' && format === 'slider' && typeof value === 'number') {
+    // TODO: add more styling
+    return <input type="range" value={value} disabled />;
   }
 
   const Customvalue =

@@ -98,16 +98,24 @@ export default {
                   source: item.attribute.name,
                   width: 150,
                   sorting: false,
-                  hidden: false,
+                  hidden: true,
                   id: generate(),
-                  ...((['bool', 'blob', 'object'] as catalog.AttributeType[]).includes(
-                    item.attribute.type as catalog.AttributeType,
-                  )
-                    ? {}
-                    : {
-                        format: '',
+                  ...(item.attribute.type === 'image'
+                    ? {
                         dataType: item.attribute.type,
-                      }),
+                      }
+                    : item.attribute.type === 'bool'
+                      ? {
+                          dataType: item.attribute.type,
+                          format: 'boolean',
+                          // TODO : Add Formatting
+                        }
+                      : ['blob', 'object'].includes(item.attribute.type)
+                        ? {}
+                        : {
+                            format: '',
+                            dataType: item.attribute.type,
+                          }),
                 } as any,
               ];
             }
