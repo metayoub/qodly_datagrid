@@ -68,6 +68,16 @@ const Pagination = ({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selection, setSelection] = useState({ selectedIndex: -1, selectedPage: -1 });
 
+  useEffect(() => {
+    // Load table settings from localStorage
+    const savedSettings = localStorage.getItem('tableSettings');
+    if (savedSettings) {
+      const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
+      setColumnVisibility(columnVisibility);
+      setColumnOrder(columnOrder);
+    }
+  }, []);
+
   // Create the table and pass your options
   const table = useReactTable({
     data,
@@ -79,9 +89,18 @@ const Pagination = ({
     enableColumnResizing: true,
     enableMultiSort: true,
     columnResizeMode: 'onChange',
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: (updater) => {
+      const newVisibilityState = updater instanceof Function ? updater(columnVisibility) : updater;
+      // Save newVisibilityState to localStorage
+      const localStorageData = {
+        columnVisibility: newVisibilityState,
+        columnOrder,
+      };
+      localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+      setColumnVisibility(updater);
+    },
     onSortingChange: setSorting,
-    onColumnOrderChange: setColumnOrder,
+
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     state: {
@@ -96,10 +115,20 @@ const Pagination = ({
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
+      // order columns
       setColumnOrder((columnOrder) => {
         const oldIndex = columnOrder.indexOf(active.id as string);
         const newIndex = columnOrder.indexOf(over.id as string);
-        return arrayMove(columnOrder, oldIndex, newIndex); //this is just a splice util
+        const newColumnOrder = arrayMove(columnOrder, oldIndex, newIndex);
+
+        // Save new column order along with current visibility state
+        const localStorageData = {
+          columnVisibility,
+          columnOrder: newColumnOrder,
+        };
+        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+
+        return newColumnOrder;
       });
     }
   };
