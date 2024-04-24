@@ -13,6 +13,7 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 | Infinite scrolling (Virtual scrolling) | ✔️       | ✔️        |
 | Pagination                             | ✔️       | ✔️        |
 | Sticky Header                          | ✔️       | ✔️        |
+| Save state in localStorage             | ✔️       |           |
 | Resizing                               | ✔️       | ✔️        |
 | AutoFit                                |          |           |
 | Styling and themes (using CSS)         | ✔️       | ✔️        |
@@ -32,9 +33,16 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 - Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ? waiting for a custom formatting
 - Styling (CSS) : On going
 - Editable cells : need POC
-- Save State : need POC
+- Save State in a dataSource : On going
 - Add events: on click, on select ...
 - Remove Unnecessary properties
+
+## Save State
+
+You can save the state of column visibility and order using `localStorage`:
+
+- **Column Visibility**: Toggle column visibility, and changes will be automatically saved.
+- **Column Order**: Reorder columns by dragging and dropping them, and the new order will be saved.
 
 ## Styling
 

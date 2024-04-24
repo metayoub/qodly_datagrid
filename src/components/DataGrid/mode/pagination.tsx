@@ -41,6 +41,7 @@ const Pagination = ({
   columns,
   loader,
   currentElement,
+  saveState,
   emit,
 }: {
   paginationSize: number;
@@ -53,6 +54,7 @@ const Pagination = ({
   currentElement: datasources.DataSource;
   columns: ColumnDef<any, any>[];
   loader: DataLoader;
+  saveState: boolean;
   emit: TEmit;
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
@@ -70,11 +72,13 @@ const Pagination = ({
 
   useEffect(() => {
     // Load table settings from localStorage
-    const savedSettings = localStorage.getItem('tableSettings');
-    if (savedSettings) {
-      const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
-      setColumnVisibility(columnVisibility);
-      setColumnOrder(columnOrder);
+    if (saveState) {
+      const savedSettings = localStorage.getItem('tableSettings');
+      if (savedSettings) {
+        const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
+        setColumnVisibility(columnVisibility);
+        setColumnOrder(columnOrder);
+      }
     }
   }, []);
 
@@ -92,11 +96,14 @@ const Pagination = ({
     onColumnVisibilityChange: (updater) => {
       const newVisibilityState = updater instanceof Function ? updater(columnVisibility) : updater;
       // Save newVisibilityState to localStorage
-      const localStorageData = {
-        columnVisibility: newVisibilityState,
-        columnOrder,
-      };
-      localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+      if (saveState) {
+        const localStorageData = {
+          columnVisibility: newVisibilityState,
+          columnOrder,
+        };
+        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+      }
+
       setColumnVisibility(updater);
     },
     onSortingChange: setSorting,
@@ -121,13 +128,14 @@ const Pagination = ({
         const newIndex = columnOrder.indexOf(over.id as string);
         const newColumnOrder = arrayMove(columnOrder, oldIndex, newIndex);
 
-        // Save new column order along with current visibility state
-        const localStorageData = {
-          columnVisibility,
-          columnOrder: newColumnOrder,
-        };
-        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
-
+        if (saveState) {
+          // Save new column order along with current visibility state
+          const localStorageData = {
+            columnVisibility,
+            columnOrder: newColumnOrder,
+          };
+          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+        }
         return newColumnOrder;
       });
     }

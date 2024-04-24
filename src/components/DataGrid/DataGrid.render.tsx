@@ -18,6 +18,7 @@ const DataGrid: FC<IDataGridProps> = ({
   columnsVisibility,
   filter,
   variant = 'pagination',
+  saveState,
   style,
   className,
   classNames = [],
@@ -99,6 +100,7 @@ const DataGrid: FC<IDataGridProps> = ({
               headerHeight={headerHeight}
               columnsVisibility={columnsVisibility}
               filter={filter}
+              saveState={saveState}
               datasource={ds}
               columns={ColumnsAux}
               currentElement={currentElement}
@@ -113,6 +115,7 @@ const DataGrid: FC<IDataGridProps> = ({
               rowHeight={rowHeight}
               headerHeight={headerHeight}
               filter={filter}
+              saveState={saveState}
               loader={loader}
               currentElement={currentElement}
               emit={emit}

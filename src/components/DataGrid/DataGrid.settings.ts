@@ -61,6 +61,12 @@ const commonSettings: TSetting[] = [
   },
   { label: 'Display Footer', type: ESetting.CHECKBOX, defaultValue: true, key: 'displayFooter' },
   {
+    label: 'Save State In Local Storage',
+    type: ESetting.CHECKBOX,
+    defaultValue: true,
+    key: 'saveState',
+  },
+  {
     type: ESetting.DATAGRID,
     key: 'columns',
     label: 'Columns',

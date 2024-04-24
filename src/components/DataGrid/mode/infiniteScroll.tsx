@@ -46,6 +46,7 @@ const InfiniteScroll = ({
   loader,
   currentElement,
   height = '600px',
+  saveState,
   emit,
 }: {
   columns: ColumnDef<any, any>[];
@@ -57,6 +58,7 @@ const InfiniteScroll = ({
   loader: DataLoader;
   currentElement: datasources.DataSource;
   height: string | number | undefined;
+  saveState: boolean;
   emit: TEmit;
 }) => {
   //we need a reference to the scrolling element for logic down below
@@ -74,12 +76,14 @@ const InfiniteScroll = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
   useEffect(() => {
-    // Load table settings from localStorage
-    const savedSettings = localStorage.getItem('tableSettings');
-    if (savedSettings) {
-      const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
-      setColumnVisibility(columnVisibility);
-      setColumnOrder(columnOrder);
+    if (saveState) {
+      // Load table settings from localStorage
+      const savedSettings = localStorage.getItem('tableSettings');
+      if (savedSettings) {
+        const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
+        setColumnVisibility(columnVisibility);
+        setColumnOrder(columnOrder);
+      }
     }
   }, []);
 
@@ -95,11 +99,13 @@ const InfiniteScroll = ({
     onColumnVisibilityChange: (updater) => {
       const newVisibilityState = updater instanceof Function ? updater(columnVisibility) : updater;
       // Save newVisibilityState to localStorage
-      const localStorageData = {
-        columnVisibility: newVisibilityState,
-        columnOrder,
-      };
-      localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+      if (saveState) {
+        const localStorageData = {
+          columnVisibility: newVisibilityState,
+          columnOrder,
+        };
+        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+      }
       setColumnVisibility(updater);
     },
     onColumnFiltersChange: setColumnFilters,
@@ -203,14 +209,14 @@ const InfiniteScroll = ({
         const oldIndex = columnOrder.indexOf(active.id as string);
         const newIndex = columnOrder.indexOf(over.id as string);
         const newColumnOrder = arrayMove(columnOrder, oldIndex, newIndex);
-
-        // Save new column order along with current visibility state
-        const localStorageData = {
-          columnVisibility,
-          columnOrder: newColumnOrder,
-        };
-        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
-
+        if (saveState) {
+          // Save new column order along with current visibility state
+          const localStorageData = {
+            columnVisibility,
+            columnOrder: newColumnOrder,
+          };
+          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+        }
         return newColumnOrder;
       });
     }
