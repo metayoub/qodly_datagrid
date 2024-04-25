@@ -8,6 +8,7 @@ import {
   ColumnFiltersState,
   ColumnDef,
   OnChangeFn,
+  ColumnResizeMode,
 } from '@tanstack/react-table';
 // needed for table body level scope DnD setup
 import {
@@ -25,10 +26,14 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
 import { TableVisibility, TableHeader, TableBodyScroll } from '../parts';
 
-import { updateEntity } from '../hooks/useDsChangeHandler';
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
+import {
+  findIndexByRefOrValue,
+  getParentEntitySel,
+  updateEntity,
+} from '../hooks/useDsChangeHandler';
 
 interface Data {
   length: number;
@@ -88,50 +93,41 @@ const InfiniteScroll = ({
   }, []);
 
   // Create the table and pass your options
-  const table = useReactTable({
-    data: dataToDisplay,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    manualSorting: true,
-    manualFiltering: true,
-    enableColumnResizing: true,
-    columnResizeMode: 'onChange',
-    onColumnVisibilityChange: (updater) => {
-      const newVisibilityState = updater instanceof Function ? updater(columnVisibility) : updater;
-      // Save newVisibilityState to localStorage
-      if (saveState) {
-        const localStorageData = {
-          columnVisibility: newVisibilityState,
-          columnOrder,
-        };
-        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
-      }
-      setColumnVisibility(updater);
-    },
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnVisibility,
-      columnOrder,
-      columnFilters,
-    },
-  });
+  const tableOptions = useMemo(() => {
+    return {
+      data: dataToDisplay,
+      columns,
+      getCoreRowModel: getCoreRowModel(),
+      manualSorting: true,
+      manualFiltering: true,
+      enableColumnResizing: true,
+      columnResizeMode: 'onChange' as ColumnResizeMode,
+      onColumnVisibilityChange: (updater: any) => {
+        const newVisibilityState =
+          updater instanceof Function ? updater(columnVisibility) : updater;
+        // Save newVisibilityState to localStorage
+        if (saveState) {
+          const localStorageData = {
+            columnVisibility: newVisibilityState,
+            columnOrder,
+          };
+          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+        }
+        setColumnVisibility(updater);
+      },
+      onColumnFiltersChange: setColumnFilters,
+      getFilteredRowModel: getFilteredRowModel(),
+      state: {
+        sorting,
+        columnVisibility,
+        columnOrder,
+        columnFilters,
+      },
+    };
+  }, [dataToDisplay, columnVisibility, columns, columnOrder, sorting, columnFilters]);
 
+  const table = useReactTable(tableOptions);
   const pageSize = useMemo(() => (datasource as any).pageSize, [datasource]);
-  //scroll to top of table when sorting changes
-  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
-    setSorting(updater);
-    if (!!table.getRowModel().rows.length) {
-      rowVirtualizer.scrollToIndex?.(0);
-    }
-  };
-
-  //since this table option is derived from table row model state, we're using the table.setOptions utility
-  table.setOptions((prev) => ({
-    ...prev,
-    onSortingChange: handleSortingChange,
-  }));
 
   const { rows } = table.getRowModel();
 
@@ -146,6 +142,22 @@ const InfiniteScroll = ({
         : undefined,
     overscan: 10,
   });
+
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    setSorting(updater);
+    if (!!table.getRowModel().rows.length) {
+      rowVirtualizer.scrollToIndex?.(0);
+      // select the first element
+      // refreshItem(0);
+      //scroll to top of table when sorting changes
+    }
+  };
+
+  //since this table option is derived from table row model state, we're using the table.setOptions utility
+  table.setOptions((prev) => ({
+    ...prev,
+    onSortingChange: handleSortingChange,
+  }));
 
   // TODO: check why is not working
   const updateCurrentDsValue = async ({
@@ -194,11 +206,50 @@ const InfiniteScroll = ({
     await loader.refreshIndex(index);
     setData({
       length: loader.length,
-      list: loader.page,
       start: loader.start,
       end: loader.end,
     });
   }, 50);*/
+
+  const currentDsNewPosition = async () => {
+    if (!currentElement) {
+      return;
+    }
+    switch (currentElement.type) {
+      case 'entity': {
+        const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
+        const entity = await (currentElement as any).getEntity();
+        if (entity) {
+          let currentIndex = entity.getPos();
+          if (currentIndex == null && parent) {
+            // used "==" to handle both null & undefined values
+            currentIndex = await parent.findElementPosition(currentElement);
+          }
+          if (typeof currentIndex === 'number') {
+            setSelectedIndex(currentIndex);
+            // refreshItem(currentIndex);
+          }
+        } else {
+          setSelectedIndex(-1);
+        }
+        break;
+      }
+      case 'scalar': {
+        if (!datasource || datasource.dataType !== 'array') {
+          return;
+        }
+        const items = await datasource.getValue();
+        const value = await currentElement.getValue();
+        const currentIndex = findIndexByRefOrValue(items, value);
+        if (currentIndex >= 0) {
+          // selectIndex(currentIndex);
+        } else {
+          // selectIndex(-1);
+        }
+        break;
+      }
+    }
+  };
 
   // reorder columns after drag & drop
   const handleDragEnd = (event: DragEndEvent) => {
@@ -296,6 +347,15 @@ const InfiniteScroll = ({
     },
     [data, pageSize, loading],
   );
+
+  useEffect(() => {
+    const updatePosition = async () => {
+      await currentDsNewPosition();
+    };
+
+    // Call updatePosition whenever selectedIndex changes
+    updatePosition();
+  }, [selectedIndex]);
 
   return (
     <div

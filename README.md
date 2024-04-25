@@ -27,7 +27,6 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 ## TODO:
 
-- Selected Element
 - Search in column : On going
 - AutoFIt : need POC
 - Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ? waiting for a custom formatting
@@ -36,6 +35,7 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 - Save State in a dataSource : On going
 - Add events: on click, on select ...
 - Remove Unnecessary properties
+- Tested with Array of object
 
 ## Save State
 

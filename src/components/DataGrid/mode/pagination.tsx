@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useMemo } from 'react';
 import {
   getCoreRowModel,
   SortingState,
@@ -7,6 +7,7 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   ColumnDef,
+  ColumnResizeMode,
 } from '@tanstack/react-table';
 // needed for table body level scope DnD setup
 import {
@@ -83,40 +84,45 @@ const Pagination = ({
   }, []);
 
   // Create the table and pass your options
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    manualPagination: true,
-    manualSorting: true,
-    manualFiltering: true,
-    enableColumnResizing: true,
-    enableMultiSort: true,
-    columnResizeMode: 'onChange',
-    onColumnVisibilityChange: (updater) => {
-      const newVisibilityState = updater instanceof Function ? updater(columnVisibility) : updater;
-      // Save newVisibilityState to localStorage
-      if (saveState) {
-        const localStorageData = {
-          columnVisibility: newVisibilityState,
-          columnOrder,
-        };
-        localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
-      }
+  const tableOptions = useMemo(
+    () => ({
+      data,
+      columns,
+      getCoreRowModel: getCoreRowModel(),
+      manualPagination: true,
+      manualSorting: true,
+      manualFiltering: true,
+      enableColumnResizing: true,
+      enableMultiSort: true,
+      columnResizeMode: 'onChange' as ColumnResizeMode,
+      onColumnVisibilityChange: (updater: any) => {
+        const newVisibilityState =
+          updater instanceof Function ? updater(columnVisibility) : updater;
+        // Save newVisibilityState to localStorage
+        if (saveState) {
+          const localStorageData = {
+            columnVisibility: newVisibilityState,
+            columnOrder,
+          };
+          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+        }
 
-      setColumnVisibility(updater);
-    },
-    onSortingChange: setSorting,
+        setColumnVisibility(updater);
+      },
+      onSortingChange: setSorting,
 
-    onColumnFiltersChange: setColumnFilters,
-    getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnVisibility,
-      columnOrder,
-      columnFilters,
-    },
-  });
+      onColumnFiltersChange: setColumnFilters,
+      getFilteredRowModel: getFilteredRowModel(),
+      state: {
+        sorting,
+        columnVisibility,
+        columnOrder,
+        columnFilters,
+      },
+    }),
+    [columns, columnVisibility, columnOrder, columnFilters, sorting, data],
+  );
+  const table = useReactTable(tableOptions);
 
   // reorder columns after drag & drop
   const handleDragEnd = (event: DragEndEvent) => {
@@ -147,12 +153,21 @@ const Pagination = ({
     useSensor(KeyboardSensor, {}),
   );
 
+  useEffect(() => {
+    if (!currentElement) {
+      return;
+    }
+    // Get The selected element position
+    currentDsChangeHandler();
+  }, []);
+
   const updateFromLoader = useCallback(() => {
     if (!loader) {
       return;
     }
     if (currentPage === 0) {
       setCurrentPage(1);
+      setSelection((prev) => ({ ...prev, selectedPage: 1 }));
       return;
     }
     setData(loader.page);
@@ -164,7 +179,7 @@ const Pagination = ({
     if (!loader || !datasource) {
       return;
     }
-
+    console.log('useEffect 2', currentPage, pageSize, sorting, selection);
     const updateDataFromSorting = async () => {
       if (sorting.length > 0) {
         const sortingString = sorting
@@ -180,58 +195,13 @@ const Pagination = ({
       await loader
         .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
         .then(updateFromLoader);
-      await currentDsNewPosition();
+      // await currentDsNewPosition();
     };
 
     setLoading(true);
     updateDataFromSorting();
-  }, [currentPage, pageSize, sorting]);
+  }, [currentPage, pageSize, sorting, selection]);
 
-  // calcul the new position of the selected element
-  const currentDsNewPosition = async () => {
-    if (!currentElement) {
-      return;
-    }
-    switch (currentElement.type) {
-      case 'entity': {
-        const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
-        let currentIndex = await parent.findElementPosition(currentElement);
-        console.log('0', currentIndex);
-
-        /*const entity = await (currentElement as any).getEntity();
-        if (entity) {
-          let currentIndex = entity.getPos();
-          console.log('currentIndex', currentIndex);
-          if (currentIndex == null && parent) {
-            // used "==" to handle both null & undefined values
-            currentIndex = await parent.findElementPosition(currentElement);
-            console.log('currentIndex2', currentIndex);
-          }
-          if (typeof currentIndex === 'number') {
-            // selectIndex(currentIndex);
-            //refreshItem(currentIndex); // TODO
-          }
-        } else {
-          selectIndex(-1);
-        }*/
-        break;
-      }
-      case 'scalar': {
-        if (!datasource || datasource.dataType !== 'array') {
-          return;
-        }
-        const items = await datasource.getValue();
-        const value = await currentElement.getValue();
-        const currentIndex = findIndexByRefOrValue(items, value);
-        if (currentIndex >= 0) {
-          selectIndex(currentIndex);
-        } else {
-          selectIndex(-1);
-        }
-        break;
-      }
-    }
-  };
   // handle selelctElement
   const currentDsChangeHandler = useCallback(async () => {
     if (!currentElement) {
@@ -248,7 +218,9 @@ const Pagination = ({
             currentIndex = await parent.findElementPosition(currentElement);
           }
           if (typeof currentIndex === 'number') {
-            selectIndex(currentIndex);
+            // TODO: calculate the page and item
+            // setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
+            selectIndex(currentIndex % pageSize);
             //refreshItem(currentIndex); // TODO
           }
         } else {
@@ -302,7 +274,6 @@ const Pagination = ({
     }
   };
   const selectIndex = (index: number) => {
-    // TODO: pagination
     setSelection((prev) => {
       if (prev.selectedPage !== currentPage) {
         return { selectedIndex: index, selectedPage: currentPage };
@@ -312,7 +283,7 @@ const Pagination = ({
     });
   };
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (!currentElement) {
       return;
     }
@@ -321,7 +292,7 @@ const Pagination = ({
     return () => {
       currentElement.removeListener('changed', currentDsChangeHandler);
     };
-  }, [currentDsChangeHandler]);
+  }, [currentDsChangeHandler]);*/
 
   return (
     <DndContext
