@@ -28,7 +28,15 @@ const TableBodyScroll = ({
     }[]
   ) => void;
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
-  onMouseEnter: ({ source, rowIndex }: { source: string; rowIndex: number }) => void;
+  onMouseEnter: ({
+    source,
+    rowIndex,
+    value,
+  }: {
+    source: string;
+    rowIndex: number;
+    value: any;
+  }) => void;
 }) => {
   return rowVirtualizer.getVirtualItems().map((virtualRow) => {
     const { rows } = table.getRowModel();

@@ -17,7 +17,15 @@ const DragAlongCell = ({
       value: any;
     }[]
   ) => void;
-  onMouseEnter: ({ source, rowIndex }: { source: string; rowIndex: number }) => void;
+  onMouseEnter: ({
+    source,
+    rowIndex,
+    value,
+  }: {
+    source: string;
+    rowIndex: number;
+    value: any;
+  }) => void;
 }) => {
   const { isDragging, setNodeRef, transform } = useSortable({
     id: cell.column.id,
@@ -29,10 +37,16 @@ const DragAlongCell = ({
         oncellclick(e, {
           source: cell.column.id,
           rowIndex: cell.row.index,
-          value: cell.getValue() || cell.row.original[cell.column.id],
+          value: cell.row.original[cell.column.id],
         });
       }}
-      onMouseEnter={() => onMouseEnter({ source: cell.column.id, rowIndex: cell.row.index })}
+      onMouseEnter={() =>
+        onMouseEnter({
+          source: cell.column.id,
+          rowIndex: cell.row.index,
+          value: cell.row.original[cell.column.id],
+        })
+      }
       style={{
         opacity: isDragging ? 0.8 : 1,
         transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing

@@ -27,7 +27,15 @@ const TableBody = ({
       value: any;
     }[]
   ) => void;
-  onMouseEnter: (row: any) => void;
+  onMouseEnter: ({
+    source,
+    rowIndex,
+    value,
+  }: {
+    source: string;
+    rowIndex: number;
+    value: any;
+  }) => void;
 }) => {
   return table.getRowModel().rows.map((row) => (
     <tr

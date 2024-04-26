@@ -452,10 +452,11 @@ const InfiniteScroll = ({
                 rowVirtualizer={rowVirtualizer}
                 selectedIndex={selectedIndex}
                 oncellclick={handleCellClick}
-                onMouseEnter={({ rowIndex, source }) => {
+                onMouseEnter={({ rowIndex, source, value }) => {
                   emit('oncellmouseenter', {
                     row: rowIndex,
                     name: source,
+                    value,
                   });
                 }}
               />

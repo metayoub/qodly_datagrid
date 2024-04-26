@@ -354,10 +354,11 @@ const Pagination = ({
               page={currentPage}
               selection={selection}
               oncellclick={handleCellClick}
-              onMouseEnter={({ rowIndex, source }) => {
+              onMouseEnter={({ rowIndex, source, value }) => {
                 emit('oncellmouseenter', {
                   row: rowIndex,
                   name: source,
+                  value,
                 });
               }}
             />
