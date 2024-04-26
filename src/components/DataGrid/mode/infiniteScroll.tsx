@@ -147,10 +147,7 @@ const InfiniteScroll = ({
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
     setSorting(updater);
     if (!!table.getRowModel().rows.length) {
-      rowVirtualizer.scrollToIndex?.(0);
-      // select the first element
-      // refreshItem(0);
-      //scroll to top of table when sorting changes
+      rowVirtualizer.scrollToIndex(0);
     }
   };
 
@@ -202,22 +199,10 @@ const InfiniteScroll = ({
     loader.fetchPage(start, end).then(updateFromLoader);
   };
 
-  /*const refreshItem = debounce(async (index: number) => {
-    if (!loader) return;
-    await loader.refreshIndex(index);
-    setData({
-      length: loader.length,
-      start: loader.start,
-      end: loader.end,
-    });
-  }, 50);*/
-
   const currentDsNewPosition = async () => {
     if (!currentElement) {
       return;
     }
-
-    // todo: scroll to current element
     switch (currentElement.type) {
       case 'entity': {
         const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
@@ -230,7 +215,7 @@ const InfiniteScroll = ({
           }
           if (typeof currentIndex === 'number') {
             setSelectedIndex(currentIndex);
-            // refreshItem(currentIndex);
+            rowVirtualizer.scrollToIndex(currentIndex + 5); // replace 5 by any other number
           }
         } else {
           setSelectedIndex(-1);
