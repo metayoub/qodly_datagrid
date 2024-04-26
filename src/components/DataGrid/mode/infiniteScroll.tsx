@@ -34,6 +34,7 @@ import {
   getParentEntitySel,
   updateEntity,
 } from '../hooks/useDsChangeHandler';
+import { isNumber } from 'lodash';
 
 interface Data {
   length: number;
@@ -215,6 +216,8 @@ const InfiniteScroll = ({
     if (!currentElement) {
       return;
     }
+
+    // todo: scroll to current element
     switch (currentElement.type) {
       case 'entity': {
         const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
@@ -356,6 +359,17 @@ const InfiniteScroll = ({
     // Call updatePosition whenever selectedIndex changes
     updatePosition();
   }, [selectedIndex]);
+
+  useEffect(() => {
+    if (!currentElement) {
+      return;
+    }
+
+    currentElement.addListener('changed', currentDsNewPosition);
+    return () => {
+      currentElement.removeListener('changed', currentDsNewPosition);
+    };
+  }, [currentDsNewPosition]);
 
   return (
     <div
