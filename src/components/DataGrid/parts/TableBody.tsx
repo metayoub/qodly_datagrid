@@ -11,6 +11,7 @@ const TableBody = ({
   page,
   onRowClick,
   oncellclick,
+  onMouseEnter,
 }: {
   table: Table<any>;
   rowHeight: number;
@@ -25,6 +26,7 @@ const TableBody = ({
       rowIndex: number;
     }[]
   ) => void;
+  onMouseEnter: (row: any) => void;
 }) => {
   return table.getRowModel().rows.map((row) => (
     <tr
@@ -38,7 +40,12 @@ const TableBody = ({
     >
       {row.getVisibleCells().map((cell) => (
         <SortableContext key={cell.id} items={columnOrder} strategy={horizontalListSortingStrategy}>
-          <DragAlongCell key={cell.id} cell={cell} oncellclick={oncellclick} />
+          <DragAlongCell
+            key={cell.id}
+            cell={cell}
+            oncellclick={oncellclick}
+            onMouseEnter={onMouseEnter}
+          />
         </SortableContext>
       ))}
     </tr>

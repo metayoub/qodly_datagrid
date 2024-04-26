@@ -10,12 +10,20 @@ const DraggableTableHeader = ({
   header,
   headerHeight,
   children,
+  handleHeaderClick,
 }: {
   header: any;
   headerHeight: number;
   filter: Boolean;
   table: Table<any>;
   children: ReactNode;
+  handleHeaderClick: (
+    event: React.MouseEvent<Element, MouseEvent>,
+    ...params: {
+      source: string;
+      index: number;
+    }[]
+  ) => void;
 }) => {
   const { attributes, isDragging, listeners, setNodeRef, transform } = useSortable({
     id: header.column.id,
@@ -23,6 +31,9 @@ const DraggableTableHeader = ({
 
   return (
     <th
+      onClick={async (e) => {
+        handleHeaderClick(e, { source: header.column.id, index: header.index });
+      }}
       key={header.id}
       colSpan={header.colSpan}
       className={`th-${header.column.id} flex relative whitespace-nowrap`}

@@ -89,6 +89,14 @@ const Pagination = ({
       emitCellEvent('oncellclick', params);
     },
   );
+  const handleHeaderClick = useDoubleClick<{ source: string; index: number }>(
+    (_, params) => {
+      emit('onheaderdblclick', params);
+    },
+    (_, params) => {
+      emit('onheaderclick', params);
+    },
+  );
 
   useEffect(() => {
     // Load table settings from localStorage
@@ -323,6 +331,7 @@ const Pagination = ({
           headerHeight={headerHeight}
           filter={filter}
           columnOrder={columnOrder}
+          handleHeaderClick={handleHeaderClick}
         />
         <tbody className="body">
           {loading ? (
@@ -344,6 +353,12 @@ const Pagination = ({
               page={currentPage}
               selection={selection}
               oncellclick={handleCellClick}
+              onMouseEnter={({ rowIndex, source }) => {
+                emit('oncellmouseenter', {
+                  row: rowIndex,
+                  name: source,
+                });
+              }}
             />
           )}
         </tbody>

@@ -99,6 +99,14 @@ const InfiniteScroll = ({
       emitCellEvent('oncellclick', params);
     },
   );
+  const handleHeaderClick = useDoubleClick<{ source: string; index: number }>(
+    (_, params) => {
+      emit('onheaderdblclick', params);
+    },
+    (_, params) => {
+      emit('onheaderclick', params);
+    },
+  );
 
   useEffect(() => {
     if (saveState) {
@@ -417,6 +425,7 @@ const InfiniteScroll = ({
             headerHeight={headerHeight}
             filter={filter}
             columnOrder={columnOrder}
+            handleHeaderClick={handleHeaderClick}
           />
           <tbody
             className="relative grid"
@@ -443,6 +452,12 @@ const InfiniteScroll = ({
                 rowVirtualizer={rowVirtualizer}
                 selectedIndex={selectedIndex}
                 oncellclick={handleCellClick}
+                onMouseEnter={({ rowIndex, source }) => {
+                  emit('oncellmouseenter', {
+                    row: rowIndex,
+                    name: source,
+                  });
+                }}
               />
             )}
           </tbody>

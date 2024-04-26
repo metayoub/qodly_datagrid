@@ -6,6 +6,7 @@ import { flexRender } from '@tanstack/react-table';
 const DragAlongCell = ({
   cell,
   oncellclick,
+  onMouseEnter,
 }: {
   cell: any;
   oncellclick: (
@@ -15,6 +16,7 @@ const DragAlongCell = ({
       rowIndex: number;
     }[]
   ) => void;
+  onMouseEnter: ({ source, rowIndex }: { source: string; rowIndex: number }) => void;
 }) => {
   const { isDragging, setNodeRef, transform } = useSortable({
     id: cell.column.id,
@@ -25,6 +27,7 @@ const DragAlongCell = ({
       onClick={(e) => {
         oncellclick(e, { source: cell.column.id, rowIndex: cell.row.index });
       }}
+      onMouseEnter={() => onMouseEnter({ source: cell.column.id, rowIndex: cell.row.index })}
       style={{
         opacity: isDragging ? 0.8 : 1,
         transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing

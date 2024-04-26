@@ -9,12 +9,20 @@ const TableHeader = ({
   filter,
   columnOrder,
   infinite = false,
+  handleHeaderClick,
 }: {
   table: Table<any>;
   headerHeight: number;
   filter: boolean;
   columnOrder: string[];
   infinite?: boolean;
+  handleHeaderClick: (
+    event: React.MouseEvent<Element, MouseEvent>,
+    ...params: {
+      source: string;
+      index: number;
+    }[]
+  ) => void;
 }) => {
   return (
     <thead className={`header grid ${infinite && 'sticky top-0 z-10'} bg-gray-50`}>
@@ -28,6 +36,7 @@ const TableHeader = ({
                 headerHeight={headerHeight}
                 filter={filter}
                 table={table}
+                handleHeaderClick={handleHeaderClick}
               >
                 {false && filter && header.column.getCanFilter() && (
                   <TableFilter column={header.column} table={table} />
