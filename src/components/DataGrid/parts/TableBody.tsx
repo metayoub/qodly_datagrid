@@ -24,7 +24,7 @@ const TableBody = ({
       style={{ height: rowHeight }}
       className={cn(`flex tr-${row.id}`, {
         selected: selection.selectedIndex === row.index && selection.selectedPage === page,
-        'bg-cyan-200': selection.selectedIndex === row.index && selection.selectedPage === page,
+        'bg-blue-100': selection.selectedIndex === row.index && selection.selectedPage === page,
       })}
       onClick={() => onRowClick(row)}
     >

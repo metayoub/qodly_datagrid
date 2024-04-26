@@ -352,6 +352,25 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
+    if (!loader || !datasource) {
+      return;
+    }
+
+    const dsListener = () => {
+      loader.sourceHasChanged().then(() => {
+        updateFromLoader();
+        if (isNumber(selectedIndex) && selectedIndex > -1) {
+          currentDsNewPosition();
+        }
+      });
+    };
+    datasource.addListener('changed', dsListener);
+    return () => {
+      datasource.removeListener('changed', dsListener);
+    };
+  }, [selectedIndex]);
+
+  useEffect(() => {
     const updatePosition = async () => {
       await currentDsNewPosition();
     };

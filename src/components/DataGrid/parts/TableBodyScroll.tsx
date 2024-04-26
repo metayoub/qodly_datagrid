@@ -34,7 +34,7 @@ const TableBodyScroll = ({
         // remove className and use only style
         className={cn(`flex absolute w-full tr-${virtualRow.index}`, {
           selected: selectedIndex === virtualRow.index,
-          'bg-cyan-200': selectedIndex === virtualRow.index,
+          'bg-blue-100': selectedIndex === virtualRow.index,
         })}
         onClick={() => onRowClick(virtualRow)}
       >

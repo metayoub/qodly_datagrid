@@ -179,7 +179,6 @@ const Pagination = ({
     if (!loader || !datasource) {
       return;
     }
-    console.log('useEffect 2', currentPage, pageSize, sorting, selection);
     const updateDataFromSorting = async () => {
       if (sorting.length > 0) {
         const sortingString = sorting
@@ -218,10 +217,8 @@ const Pagination = ({
             currentIndex = await parent.findElementPosition(currentElement);
           }
           if (typeof currentIndex === 'number') {
-            // TODO: calculate the page and item
-            // setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
-            selectIndex(currentIndex % pageSize);
-            //refreshItem(currentIndex); // TODO
+            setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
+            selectIndex(currentIndex % pageSize, Math.floor(currentIndex / pageSize) + 1);
           }
         } else {
           selectIndex(-1);
@@ -273,26 +270,25 @@ const Pagination = ({
       }
     }
   };
-  const selectIndex = (index: number) => {
+  const selectIndex = (index: number, curPage = currentPage) => {
     setSelection((prev) => {
-      if (prev.selectedPage !== currentPage) {
-        return { selectedIndex: index, selectedPage: currentPage };
+      if (prev.selectedPage !== curPage) {
+        return { selectedIndex: index, selectedPage: curPage };
       } else {
         return { ...prev, selectedIndex: index };
       }
     });
   };
 
-  /*useEffect(() => {
+  useEffect(() => {
     if (!currentElement) {
       return;
     }
-
     currentElement.addListener('changed', currentDsChangeHandler);
     return () => {
       currentElement.removeListener('changed', currentDsChangeHandler);
     };
-  }, [currentDsChangeHandler]);*/
+  }, [currentDsChangeHandler]);
 
   return (
     <DndContext
