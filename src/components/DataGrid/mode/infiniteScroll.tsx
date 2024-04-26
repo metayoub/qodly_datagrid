@@ -446,7 +446,7 @@ const InfiniteScroll = ({
                 columnOrder={columnOrder}
                 onRowClick={async (row) => {
                   await updateCurrentDsValue({ index: row.index });
-                  emit('onselect'); // TODO
+                  emit('onselect', row.original);
                   setSelectedIndex(row.index);
                 }}
                 rowVirtualizer={rowVirtualizer}

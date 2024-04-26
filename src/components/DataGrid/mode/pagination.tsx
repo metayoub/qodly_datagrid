@@ -348,7 +348,7 @@ const Pagination = ({
               columnOrder={columnOrder}
               onRowClick={async (row) => {
                 await updateCurrentDsValue({ index: row.index + pageSize * (currentPage - 1) });
-                emit('onselect'); // TODO
+                emit('onselect', row.original);
                 selectIndex(row.index);
               }}
               page={currentPage}
