@@ -14,6 +14,7 @@ const DragAlongCell = ({
     ...params: {
       source: string;
       rowIndex: number;
+      value: any;
     }[]
   ) => void;
   onMouseEnter: ({ source, rowIndex }: { source: string; rowIndex: number }) => void;
@@ -25,7 +26,11 @@ const DragAlongCell = ({
   return (
     <td
       onClick={(e) => {
-        oncellclick(e, { source: cell.column.id, rowIndex: cell.row.index });
+        oncellclick(e, {
+          source: cell.column.id,
+          rowIndex: cell.row.index,
+          value: cell.getValue() || cell.row.original[cell.column.id],
+        });
       }}
       onMouseEnter={() => onMouseEnter({ source: cell.column.id, rowIndex: cell.row.index })}
       style={{

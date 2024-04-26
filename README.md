@@ -33,7 +33,6 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 - Styling (CSS) : On going
 - Editable cells : need POC
 - Save State in a dataSource : On going
-- Add events: on click, on select ...
 - Remove Unnecessary properties
 - Tested with Array of object
 

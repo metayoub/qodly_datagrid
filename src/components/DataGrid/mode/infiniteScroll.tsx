@@ -91,7 +91,7 @@ const InfiniteScroll = ({
       name: source,
     });
   };
-  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number }>(
+  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
     },

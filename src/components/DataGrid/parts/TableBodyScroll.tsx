@@ -24,6 +24,7 @@ const TableBodyScroll = ({
     ...params: {
       source: string;
       rowIndex: number;
+      value: any;
     }[]
   ) => void;
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>;

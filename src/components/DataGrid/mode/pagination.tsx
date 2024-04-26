@@ -74,14 +74,15 @@ const Pagination = ({
 
   const emitCellEvent = (
     eventName: string,
-    { source, rowIndex }: { source: string; rowIndex: number },
+    { source, rowIndex, value }: { source: string; rowIndex: number; value: any },
   ) => {
     emit(eventName, {
       row: rowIndex,
       name: source,
+      value: value,
     });
   };
-  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number }>(
+  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
     },

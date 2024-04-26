@@ -24,6 +24,7 @@ const TableBody = ({
     ...params: {
       source: string;
       rowIndex: number;
+      value: any;
     }[]
   ) => void;
   onMouseEnter: (row: any) => void;
