@@ -5,6 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { IColumn, IDataGridProps } from './DataGrid.config';
 import './DataGrid.css';
 import { DataLoader } from '@ws-ui/webform-editor';
+import { useDoubleClick } from '@ws-ui/shared';
 import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
 import InfiniteScroll from './mode/infiniteScroll';
@@ -23,7 +24,20 @@ const DataGrid: FC<IDataGridProps> = ({
   className,
   classNames = [],
 }) => {
-  const { connect, emit } = useRenderer();
+  const { connect, emit } = useRenderer({
+    omittedEvents: [
+      'onmouseover',
+      'onselect',
+      'onclick',
+      'ondblclick',
+      'onheaderclick',
+      'onheaderdblclick',
+      'oncellclick',
+      'oncelldblclick',
+      'oncellmouseenter',
+      'oncellmouseleave',
+    ],
+  });
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
@@ -59,6 +73,15 @@ const DataGrid: FC<IDataGridProps> = ({
       }),
     );
 
+  const handleClick = useDoubleClick(
+    () => {
+      emit('ondblclick');
+    },
+    () => {
+      emit('onclick');
+    },
+  );
+
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {
       return null;
@@ -69,20 +92,10 @@ const DataGrid: FC<IDataGridProps> = ({
     );
   }, [columns, ds]);
 
-  /*useEffect(() => {
-    if (!ds) {
-      return;
-    }
-    const loader = DataLoader.create(
-      ds,
-      columns.map(({ source }) => source.trim()),
-    );
-    setLoader(loader);
-  }, [ds, columns]);*/
-
   return (
     <div
       ref={connect}
+      onClick={handleClick}
       style={{
         ...style,
         height: variant === 'pagination' ? 'fit-content' : style?.height,

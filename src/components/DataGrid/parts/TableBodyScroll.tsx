@@ -11,12 +11,20 @@ const TableBodyScroll = ({
   onRowClick,
   rowVirtualizer,
   selectedIndex,
+  oncellclick,
 }: {
   table: Table<any>;
   rowHeight: number;
   columnOrder: string[];
   selectedIndex: number;
   onRowClick: (row: any) => void;
+  oncellclick: (
+    event: React.MouseEvent<Element, MouseEvent>,
+    ...params: {
+      source: string;
+      rowIndex: number;
+    }[]
+  ) => void;
   rowVirtualizer: Virtualizer<HTMLDivElement, Element>;
 }) => {
   return rowVirtualizer.getVirtualItems().map((virtualRow) => {
@@ -44,7 +52,7 @@ const TableBodyScroll = ({
             items={columnOrder}
             strategy={horizontalListSortingStrategy}
           >
-            <DragAlongCell key={cell.id} cell={cell} />
+            <DragAlongCell key={cell.id} cell={cell} oncellclick={oncellclick} />
           </SortableContext>
         ))}
       </tr>

@@ -23,6 +23,7 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
+import { useDoubleClick } from '@ws-ui/shared';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
 import {
@@ -70,6 +71,24 @@ const Pagination = ({
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selection, setSelection] = useState({ selectedIndex: -1, selectedPage: -1 });
+
+  const emitCellEvent = (
+    eventName: string,
+    { source, rowIndex }: { source: string; rowIndex: number },
+  ) => {
+    emit(eventName, {
+      row: rowIndex,
+      name: source,
+    });
+  };
+  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number }>(
+    (_, params) => {
+      emitCellEvent('oncelldblclick', params);
+    },
+    (_, params) => {
+      emitCellEvent('oncellclick', params);
+    },
+  );
 
   useEffect(() => {
     // Load table settings from localStorage
@@ -324,6 +343,7 @@ const Pagination = ({
               }}
               page={currentPage}
               selection={selection}
+              oncellclick={handleCellClick}
             />
           )}
         </tbody>

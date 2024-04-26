@@ -3,13 +3,28 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { flexRender } from '@tanstack/react-table';
 
-const DragAlongCell = ({ cell }: { cell: any }) => {
+const DragAlongCell = ({
+  cell,
+  oncellclick,
+}: {
+  cell: any;
+  oncellclick: (
+    event: React.MouseEvent<Element, MouseEvent>,
+    ...params: {
+      source: string;
+      rowIndex: number;
+    }[]
+  ) => void;
+}) => {
   const { isDragging, setNodeRef, transform } = useSortable({
     id: cell.column.id,
   });
 
   return (
     <td
+      onClick={(e) => {
+        oncellclick(e, { source: cell.column.id, rowIndex: cell.row.index });
+      }}
       style={{
         opacity: isDragging ? 0.8 : 1,
         transform: CSS.Translate.toString(transform), // translate instead of transform to avoid squishing

@@ -54,12 +54,26 @@ export default {
         value: 'onclick',
       },
       {
-        label: 'On MouseEnter',
-        value: 'onmouseenter',
+        label: 'On DoubleClick',
+        value: 'ondblclick',
+      },
+
+      {
+        label: 'On HeaderClick',
+        value: 'onheaderclick',
       },
       {
-        label: 'On MouseLeave',
-        value: 'onmouseleave',
+        label: 'On HeaderDoubleClick',
+        value: 'onheaderdblclick',
+      },
+
+      {
+        label: 'On CellClick',
+        value: 'oncellclick',
+      },
+      {
+        label: 'On CellDoubleClick',
+        value: 'oncelldblclick',
       },
       {
         label: 'On KeyDown',
@@ -68,6 +82,14 @@ export default {
       {
         label: 'On KeyUp',
         value: 'onkeyup',
+      },
+      {
+        label: 'On MouseEnter',
+        value: 'onmouseenter',
+      },
+      {
+        label: 'On MouseLeave',
+        value: 'onmouseleave',
       },
       {
         label: 'On CellMouseEnter',

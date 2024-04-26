@@ -10,6 +10,7 @@ const TableBody = ({
   selection,
   page,
   onRowClick,
+  oncellclick,
 }: {
   table: Table<any>;
   rowHeight: number;
@@ -17,6 +18,13 @@ const TableBody = ({
   selection: any;
   page: number;
   onRowClick: (row: any) => void;
+  oncellclick: (
+    event: React.MouseEvent<Element, MouseEvent>,
+    ...params: {
+      source: string;
+      rowIndex: number;
+    }[]
+  ) => void;
 }) => {
   return table.getRowModel().rows.map((row) => (
     <tr
@@ -30,7 +38,7 @@ const TableBody = ({
     >
       {row.getVisibleCells().map((cell) => (
         <SortableContext key={cell.id} items={columnOrder} strategy={horizontalListSortingStrategy}>
-          <DragAlongCell key={cell.id} cell={cell} />
+          <DragAlongCell key={cell.id} cell={cell} oncellclick={oncellclick} />
         </SortableContext>
       ))}
     </tr>
