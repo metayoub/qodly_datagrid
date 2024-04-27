@@ -319,62 +319,66 @@ const Pagination = ({
   }, [currentDsChangeHandler]);
 
   return (
-    <DndContext
-      collisionDetection={closestCenter}
-      modifiers={[restrictToHorizontalAxis]}
-      onDragEnd={handleDragEnd}
-      sensors={sensors}
-    >
+    <div className="p-2 block max-w-full">
       {columnsVisibility && <TableVisibility table={table} />}
-      <table>
-        <TableHeader
-          table={table}
-          headerHeight={headerHeight}
-          filter={filter}
-          columnOrder={columnOrder}
-          handleHeaderClick={handleHeaderClick}
-        />
-        <tbody className="body">
-          {loading ? (
-            <tr>
-              <td colSpan={100}>
-                <div className="loading">⏳</div>
-              </td>
-            </tr>
-          ) : (
-            <TableBody
+      <div className="overflow-x-scroll overflow-y-hidden">
+        <DndContext
+          collisionDetection={closestCenter}
+          modifiers={[restrictToHorizontalAxis]}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          <table className="w-full">
+            <TableHeader
               table={table}
-              rowHeight={rowHeight}
+              headerHeight={headerHeight}
+              filter={filter}
               columnOrder={columnOrder}
-              onRowClick={async (row) => {
-                await updateCurrentDsValue({ index: row.index + pageSize * (currentPage - 1) });
-                emit('onselect', row.original);
-                selectIndex(row.index);
-              }}
-              page={currentPage}
-              selection={selection}
-              oncellclick={handleCellClick}
-              onMouseEnter={({ rowIndex, source, value }) => {
-                emit('oncellmouseenter', {
-                  row: rowIndex,
-                  name: source,
-                  value,
-                });
-              }}
+              handleHeaderClick={handleHeaderClick}
             />
-          )}
-        </tbody>
-        {displayFooter && <TableFooter table={table} columnOrder={columnOrder} />}
-      </table>
-      <TablePagination
-        table={table}
-        total={total}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        pageSize={pageSize}
-        setPageSize={setPageSize}
-      />
-    </DndContext>
+            <tbody className="body">
+              {loading ? (
+                <tr>
+                  <td colSpan={100}>
+                    <div className="loading">⏳</div>
+                  </td>
+                </tr>
+              ) : (
+                <TableBody
+                  table={table}
+                  rowHeight={rowHeight}
+                  columnOrder={columnOrder}
+                  onRowClick={async (row) => {
+                    await updateCurrentDsValue({ index: row.index + pageSize * (currentPage - 1) });
+                    emit('onselect', row.original);
+                    selectIndex(row.index);
+                  }}
+                  page={currentPage}
+                  selection={selection}
+                  oncellclick={handleCellClick}
+                  onMouseEnter={({ rowIndex, source, value }) => {
+                    emit('oncellmouseenter', {
+                      row: rowIndex,
+                      name: source,
+                      value,
+                    });
+                  }}
+                />
+              )}
+            </tbody>
+            {displayFooter && <TableFooter table={table} columnOrder={columnOrder} />}
+          </table>
+          <TablePagination
+            table={table}
+            total={total}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+          />
+        </DndContext>
+      </div>
+    </div>
   );
 };
 
