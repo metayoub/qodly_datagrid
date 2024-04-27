@@ -96,73 +96,75 @@ const DataGrid: FC<IDataGridProps> = ({
       className={cn(className, classNames)}
     >
       {columnsVisibility && <TableVisibility table={table} disabled={true} />}
-      {datasource ? (
-        ColumnsAux.length > 0 && data ? (
-          <table
-            {...{
-              style: {
-                width: table.getCenterTotalSize(),
-              },
-            }}
-          >
-            <thead className="header bg-gray-50">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th
-                      className={`th-${header.column.id} text-left`}
-                      {...{
-                        key: header.id,
-                        colSpan: header.colSpan,
-                        style: {
-                          height: headerHeight,
-                          width: header.getSize(),
-                        },
-                      }}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </th>
-                  ))}
-                </tr>
-              ))}
-            </thead>
-            <tbody className="body">
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} style={{ height: rowHeight }}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className={`td-${cell.column.id}`}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-            {variant === 'pagination' && displayFooter && (
-              <tfoot className="footer">
-                {table.getFooterGroups().map((footerGroup) => (
-                  <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>
-                    {footerGroup.headers.map((header) => (
-                      <th key={header.id}>
-                        {flexRender(header.column.columnDef.footer, header.getContext())}
+      <div className="block max-w-full overflow-x-scroll overflow-y-hidden">
+        {datasource ? (
+          ColumnsAux.length > 0 && data ? (
+            <table
+              {...{
+                style: {
+                  width: table.getCenterTotalSize(),
+                },
+              }}
+            >
+              <thead className="header bg-gray-50">
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <th
+                        className={`th-${header.column.id} text-left`}
+                        {...{
+                          key: header.id,
+                          colSpan: header.colSpan,
+                          style: {
+                            height: headerHeight,
+                            width: header.getSize(),
+                          },
+                        }}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                       </th>
                     ))}
                   </tr>
                 ))}
-              </tfoot>
-            )}
-          </table>
+              </thead>
+              <tbody className="body">
+                {table.getRowModel().rows.map((row) => (
+                  <tr key={row.id} style={{ height: rowHeight }}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className={`td-${cell.column.id}`}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+              {variant === 'pagination' && displayFooter && (
+                <tfoot className="footer">
+                  {table.getFooterGroups().map((footerGroup) => (
+                    <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>
+                      {footerGroup.headers.map((header) => (
+                        <th key={header.id}>
+                          {flexRender(header.column.columnDef.footer, header.getContext())}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </tfoot>
+              )}
+            </table>
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
+              <BsFillInfoCircleFill className="mb-1 h-8 w-8" />
+              <p>Please add columns</p>
+            </div>
+          )
         ) : (
           <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
             <BsFillInfoCircleFill className="mb-1 h-8 w-8" />
-            <p>Please add columns</p>
+            <p>Please attach a datasource</p>
           </div>
-        )
-      ) : (
-        <div className="flex h-full flex-col items-center justify-center rounded-lg border bg-purple-400 py-4 text-white">
-          <BsFillInfoCircleFill className="mb-1 h-8 w-8" />
-          <p>Please attach a datasource</p>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

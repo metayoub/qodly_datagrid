@@ -319,7 +319,7 @@ const Pagination = ({
   }, [currentDsChangeHandler]);
 
   return (
-    <div className="p-2 block max-w-full">
+    <div className="block max-w-full">
       {columnsVisibility && <TableVisibility table={table} />}
       <div className="overflow-x-scroll overflow-y-hidden">
         <DndContext
