@@ -1,5 +1,6 @@
 import { formatValue } from '@ws-ui/webform-editor';
 import { MdCheck, MdClose } from 'react-icons/md';
+import { DataType, getStyle } from '@ws-ui/formatter';
 
 const CustomCell = ({ format, dataType, value }: { format: any; dataType: string; value: any }) => {
   switch (true) {
@@ -26,7 +27,9 @@ const CustomCell = ({ format, dataType, value }: { format: any; dataType: string
             ? formatValue(value, dataType, format)
             : value.toString()
           : value;
-      return <>{customValue}</>;
+      const customStyle = format ? getStyle(dataType as DataType, format, value) : {};
+
+      return <div style={customStyle}>{customValue}</div>;
   }
 };
 
