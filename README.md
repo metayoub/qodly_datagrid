@@ -2,6 +2,8 @@
 
 DataGrid's Qodly component using [react-table](https://github.com/TanStack/table)
 
+![dataGrid](public/table.png)
+
 ## Featurees
 
 |                                        | DataGrid | DataTable |
@@ -29,7 +31,6 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 - Search in column : On going
 - AutoFIt : need POC
-- Customizable columns (display picture, ...) : picture done, boolean ?? slider ?? object ? waiting for a custom formatting
 - Styling (CSS) : On going
 - Editable cells : need POC
 - Save State in a dataSource : On going
