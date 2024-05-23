@@ -23,7 +23,7 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
-// import { useDoubleClick } from '@ws-ui/shared';
+import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
 import {
@@ -82,7 +82,7 @@ const Pagination = ({
       value: value,
     });
   };
-  /*const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
+  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
     },
@@ -97,7 +97,7 @@ const Pagination = ({
     (_, params) => {
       emit('onheaderclick', params);
     },
-  );*/
+  );
 
   useEffect(() => {
     // Load table settings from localStorage
@@ -334,11 +334,7 @@ const Pagination = ({
               headerHeight={headerHeight}
               filter={filter}
               columnOrder={columnOrder}
-              handleHeaderClick={
-                /*handleHeaderClick*/ (_, params) => {
-                  emit('onheaderclick', params);
-                }
-              }
+              handleHeaderClick={handleHeaderClick}
             />
             <tbody className="body">
               {loading ? (
@@ -359,11 +355,7 @@ const Pagination = ({
                   }}
                   page={currentPage}
                   selection={selection}
-                  oncellclick={
-                    /*handleCellClick*/ (_, params) => {
-                      emitCellEvent('oncellclick', params);
-                    }
-                  }
+                  oncellclick={handleCellClick}
                   onMouseEnter={({ rowIndex, source, value }) => {
                     emit('oncellmouseenter', {
                       row: rowIndex,

@@ -24,7 +24,7 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
-// import { useDoubleClick } from '@ws-ui/shared';
+import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBodyScroll } from '../parts';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -91,7 +91,7 @@ const InfiniteScroll = ({
       name: source,
     });
   };
-  /*const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
+  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
     },
@@ -106,7 +106,7 @@ const InfiniteScroll = ({
     (_, params) => {
       emit('onheaderclick', params);
     },
-  );*/
+  );
 
   useEffect(() => {
     if (saveState) {
@@ -426,11 +426,7 @@ const InfiniteScroll = ({
               headerHeight={headerHeight}
               filter={filter}
               columnOrder={columnOrder}
-              handleHeaderClick={
-                /*handleHeaderClick*/ (_, params) => {
-                  emit('onheaderclick', params);
-                }
-              }
+              handleHeaderClick={handleHeaderClick}
             />
             <tbody
               className="relative grid"
@@ -456,11 +452,7 @@ const InfiniteScroll = ({
                   }}
                   rowVirtualizer={rowVirtualizer}
                   selectedIndex={selectedIndex}
-                  oncellclick={
-                    /*handleCellClick*/ (_, params) => {
-                      emitCellEvent('oncellclick', params);
-                    }
-                  }
+                  oncellclick={handleCellClick}
                   onMouseEnter={({ rowIndex, source, value }) => {
                     emit('oncellmouseenter', {
                       row: rowIndex,

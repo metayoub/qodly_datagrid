@@ -5,7 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { IColumn, IDataGridProps } from './DataGrid.config';
 import './DataGrid.css';
 import { DataLoader } from '@ws-ui/webform-editor';
-// import { useDoubleClick } from '@ws-ui/shared';
+import { useDoubleClick } from './hooks/useDoubleClick';
 import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
 import InfiniteScroll from './mode/infiniteScroll';
@@ -73,14 +73,14 @@ const DataGrid: FC<IDataGridProps> = ({
       }),
     );
 
-  /*const handleClick = useDoubleClick(
+  const handleClick = useDoubleClick(
     () => {
       emit('ondblclick');
     },
     () => {
       emit('onclick');
     },
-  );*/
+  );
 
   const loader = useMemo<DataLoader | null>(() => {
     if (!ds) {
@@ -95,11 +95,7 @@ const DataGrid: FC<IDataGridProps> = ({
   return (
     <div
       ref={connect}
-      onClick={
-        /*handleClick*/ () => {
-          emit('onclick');
-        }
-      }
+      onClick={handleClick}
       style={{
         ...style,
         height: variant === 'pagination' ? 'fit-content' : style?.height,
