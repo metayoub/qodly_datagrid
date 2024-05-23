@@ -4,21 +4,31 @@ import {
   isDatasourcePayload,
   isAttributePayload,
   getDataTransferSourceID,
+  Settings,
 } from '@ws-ui/webform-editor';
-import {
-  isArrayDatasource,
-  isEntityDatasource,
-  isEntitySelectionDatasource,
-  isObjectDatasource,
-  isRelatedEntitiesAttribute,
-  isRelatedEntityAttribute,
-} from '@ws-ui/shared';
 
-import { Settings } from '@ws-ui/webform-editor';
 import { MdGridOn } from 'react-icons/md';
-import { capitalize, cloneDeep } from 'lodash';
+import capitalize from 'lodash/capitalize';
+import cloneDeep from 'lodash/cloneDeep';
 import DataGridSettings, { BasicSettings } from './DataGrid.settings';
 import { generate } from 'short-uuid';
+
+const types: string[] = [
+  'bool',
+  'word',
+  'string',
+  'text',
+  'uuid',
+  'short',
+  'long',
+  'number',
+  'long64',
+  'duration',
+  'object',
+  'date',
+  'image',
+  'blob',
+];
 
 export default {
   craft: {
@@ -101,16 +111,30 @@ export default {
         const new_props = cloneDeep(query.node(nodeId).get().data.props) as IExostiveElementProps;
         payload.forEach((item) => {
           if (isDatasourcePayload(item)) {
-            if (isEntitySelectionDatasource(item.source) || isArrayDatasource(item.source)) {
+            if (
+              item.source.type === 'entitysel' ||
+              (item.source.type === 'scalar' && item.source.dataType === 'array')
+            ) {
               new_props.datasource = getDataTransferSourceID(item);
             }
-            if (isEntityDatasource(item.source) || isObjectDatasource(item.source)) {
+            if (
+              item.source.type === 'entity' ||
+              (item.source.type === 'scalar' && item.source.dataType === 'object')
+            ) {
               new_props.currentElement = getDataTransferSourceID(item);
             }
           } else if (isAttributePayload(item)) {
-            if (isRelatedEntitiesAttribute(item.attribute)) {
+            if (
+              item.attribute.kind === 'relatedEntities' ||
+              item.attribute.type?.includes('Selection') ||
+              item.attribute.behavior === 'relatedEntities'
+            ) {
               new_props.datasource = getDataTransferSourceID(item);
-            } else if (isRelatedEntityAttribute(item.attribute)) {
+            } else if (
+              item.attribute.kind === 'relatedEntity' ||
+              item.attribute.behavior === 'relatedEntity' ||
+              !types.includes(item.attribute.type)
+            ) {
               new_props.currentElement = getDataTransferSourceID(item);
             } else {
               new_props.columns = [

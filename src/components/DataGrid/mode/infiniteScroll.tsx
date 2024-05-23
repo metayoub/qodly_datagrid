@@ -24,7 +24,7 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
-import { useDoubleClick } from '@ws-ui/shared';
+// import { useDoubleClick } from '@ws-ui/shared';
 import { TableVisibility, TableHeader, TableBodyScroll } from '../parts';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -35,7 +35,7 @@ import {
   getParentEntitySel,
   updateEntity,
 } from '../hooks/useDsChangeHandler';
-import { isNumber } from 'lodash';
+import isNumber from 'lodash/isNumber';
 
 interface Data {
   length: number;
@@ -91,7 +91,7 @@ const InfiniteScroll = ({
       name: source,
     });
   };
-  const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
+  /*const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
     },
@@ -106,7 +106,7 @@ const InfiniteScroll = ({
     (_, params) => {
       emit('onheaderclick', params);
     },
-  );
+  );*/
 
   useEffect(() => {
     if (saveState) {
@@ -426,7 +426,11 @@ const InfiniteScroll = ({
               headerHeight={headerHeight}
               filter={filter}
               columnOrder={columnOrder}
-              handleHeaderClick={handleHeaderClick}
+              handleHeaderClick={
+                /*handleHeaderClick*/ (_, params) => {
+                  emit('onheaderclick', params);
+                }
+              }
             />
             <tbody
               className="relative grid"
@@ -452,7 +456,11 @@ const InfiniteScroll = ({
                   }}
                   rowVirtualizer={rowVirtualizer}
                   selectedIndex={selectedIndex}
-                  oncellclick={handleCellClick}
+                  oncellclick={
+                    /*handleCellClick*/ (_, params) => {
+                      emitCellEvent('oncellclick', params);
+                    }
+                  }
                   onMouseEnter={({ rowIndex, source, value }) => {
                     emit('oncellmouseenter', {
                       row: rowIndex,

@@ -1,5 +1,6 @@
 import { Table } from '@tanstack/react-table';
-import { divide, ceil } from 'lodash';
+import divide from 'lodash/divide';
+import ceil from 'lodash/ceil';
 import { MdNavigateNext, MdNavigateBefore, MdFirstPage, MdLastPage } from 'react-icons/md';
 
 const TablePagination = ({

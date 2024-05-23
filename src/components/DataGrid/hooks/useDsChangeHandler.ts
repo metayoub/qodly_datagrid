@@ -1,5 +1,4 @@
-import { isEqual } from 'lodash';
-import { _isObjectDatasource } from '@ws-ui/shared';
+import isEqual from 'lodash/isEqual';
 
 export async function updateEntity({
   index,

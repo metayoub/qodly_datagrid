@@ -10,7 +10,8 @@ import {
 import { IColumn, IDataGridProps } from './DataGrid.config';
 import './DataGrid.css';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
-import { keyBy, mapValues } from 'lodash';
+import keyBy from 'lodash/keyBy';
+import mapValues from 'lodash/mapValues';
 import { TableVisibility } from './parts';
 const DataGrid: FC<IDataGridProps> = ({
   datasource,
