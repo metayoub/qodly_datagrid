@@ -418,53 +418,51 @@ const InfiniteScroll = ({
         sensors={sensors}
       >
         {columnsVisibility && <TableVisibility table={table} />}
-        <div className="overflow-x-scroll overflow-y-hidden">
-          <table className="grid">
-            <TableHeader
-              infinite={true}
-              table={table}
-              headerHeight={headerHeight}
-              filter={filter}
-              columnOrder={columnOrder}
-              handleHeaderClick={handleHeaderClick}
-            />
-            <tbody
-              className="relative grid"
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
-              }}
-            >
-              {loading ? (
-                <tr>
-                  <td colSpan={100}>
-                    <div className="loading">⏳</div>
-                  </td>
-                </tr>
-              ) : (
-                <TableBodyScroll
-                  table={table}
-                  rowHeight={rowHeight}
-                  columnOrder={columnOrder}
-                  onRowClick={async (row) => {
-                    await updateCurrentDsValue({ index: row.index });
-                    emit('onselect', row.original);
-                    setSelectedIndex(row.index);
-                  }}
-                  rowVirtualizer={rowVirtualizer}
-                  selectedIndex={selectedIndex}
-                  oncellclick={handleCellClick}
-                  onMouseEnter={({ rowIndex, source, value }) => {
-                    emit('oncellmouseenter', {
-                      row: rowIndex,
-                      name: source,
-                      value,
-                    });
-                  }}
-                />
-              )}
-            </tbody>
-          </table>
-        </div>
+        <table className="grid">
+          <TableHeader
+            infinite={true}
+            table={table}
+            headerHeight={headerHeight}
+            filter={filter}
+            columnOrder={columnOrder}
+            handleHeaderClick={handleHeaderClick}
+          />
+          <tbody
+            className="relative grid"
+            style={{
+              height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
+            }}
+          >
+            {loading ? (
+              <tr>
+                <td colSpan={100}>
+                  <div className="loading">⏳</div>
+                </td>
+              </tr>
+            ) : (
+              <TableBodyScroll
+                table={table}
+                rowHeight={rowHeight}
+                columnOrder={columnOrder}
+                onRowClick={async (row) => {
+                  await updateCurrentDsValue({ index: row.index });
+                  emit('onselect', row.original);
+                  setSelectedIndex(row.index);
+                }}
+                rowVirtualizer={rowVirtualizer}
+                selectedIndex={selectedIndex}
+                oncellclick={handleCellClick}
+                onMouseEnter={({ rowIndex, source, value }) => {
+                  emit('oncellmouseenter', {
+                    row: rowIndex,
+                    name: source,
+                    value,
+                  });
+                }}
+              />
+            )}
+          </tbody>
+        </table>
       </DndContext>
     </div>
   );
