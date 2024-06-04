@@ -139,7 +139,7 @@ const DataGrid: FC<IDataGridProps> = ({
                   </tr>
                 ))}
               </tbody>
-              {variant === 'pagination' && displayFooter && (
+              {displayFooter && (
                 <tfoot className="footer">
                   {table.getFooterGroups().map((footerGroup) => (
                     <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>

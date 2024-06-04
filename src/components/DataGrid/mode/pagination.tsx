@@ -8,6 +8,7 @@ import {
   ColumnFiltersState,
   ColumnDef,
   ColumnResizeMode,
+  ColumnSizingState,
 } from '@tanstack/react-table';
 // needed for table body level scope DnD setup
 import {
@@ -45,6 +46,7 @@ const Pagination = ({
   currentElement,
   saveState,
   emit,
+  serverSideRef,
 }: {
   paginationSize: number;
   displayFooter: boolean;
@@ -58,6 +60,7 @@ const Pagination = ({
   loader: DataLoader;
   saveState: boolean;
   emit: TEmit;
+  serverSideRef: string;
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
@@ -65,6 +68,7 @@ const Pagination = ({
   const [pageSize, setPageSize] = useState(paginationSize);
   const [loading, setLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
@@ -102,14 +106,31 @@ const Pagination = ({
   useEffect(() => {
     // Load table settings from localStorage
     if (saveState) {
-      const savedSettings = localStorage.getItem('tableSettings');
+      const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
       if (savedSettings) {
         const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
         setColumnOrder(columnOrder);
+        setColumnSizing(columnSizing || {});
       }
     }
   }, []);
+
+  const setColumnSizingChange = (updater: any) => {
+    console.log(updater);
+
+    const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
+    // Save newVisibilityState to localStorage
+    if (saveState) {
+      const localStorageData = {
+        columnSizing: newColumnSizeState,
+        columnVisibility,
+        columnOrder,
+      };
+      localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+    }
+    setColumnSizing(updater);
+  };
 
   // Create the table and pass your options
   const tableOptions = useMemo(
@@ -131,24 +152,26 @@ const Pagination = ({
           const localStorageData = {
             columnVisibility: newVisibilityState,
             columnOrder,
+            columnSizing,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
 
         setColumnVisibility(updater);
       },
       onSortingChange: setSorting,
-
+      onColumnSizingChange: setColumnSizingChange,
       onColumnFiltersChange: setColumnFilters,
       getFilteredRowModel: getFilteredRowModel(),
       state: {
+        columnSizing,
         sorting,
         columnVisibility,
         columnOrder,
         columnFilters,
       },
     }),
-    [columns, columnVisibility, columnOrder, columnFilters, sorting, data],
+    [columns, columnVisibility, columnOrder, columnFilters, sorting, data, columnSizing],
   );
   const table = useReactTable(tableOptions);
 
@@ -166,9 +189,10 @@ const Pagination = ({
           // Save new column order along with current visibility state
           const localStorageData = {
             columnVisibility,
+            columnSizing,
             columnOrder: newColumnOrder,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
       });

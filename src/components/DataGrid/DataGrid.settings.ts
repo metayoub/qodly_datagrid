@@ -99,7 +99,7 @@ const commonSettings: TSetting[] = [
         key: 'width',
       },
       {
-        label: 'Sorting',
+        label: 'Enable Sorting',
         defaultValue: false,
         type: ESetting.CHECKBOX,
         key: 'sorting',
@@ -109,6 +109,12 @@ const commonSettings: TSetting[] = [
         defaultValue: true,
         type: ESetting.CHECKBOX,
         key: 'hidden',
+      },
+      {
+        label: 'Enable Sizing',
+        defaultValue: false,
+        type: ESetting.CHECKBOX,
+        key: 'sizing',
       },
     ],
   },

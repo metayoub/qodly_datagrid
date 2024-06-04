@@ -23,6 +23,7 @@ const DataGrid: FC<IDataGridProps> = ({
   style,
   className,
   classNames = [],
+  serverSideRef = '',
 }) => {
   const { connect, emit } = useRenderer({
     omittedEvents: [
@@ -51,7 +52,8 @@ const DataGrid: FC<IDataGridProps> = ({
         header: () => column.title,
         footer: () => column.title,
         enableSorting: column.sorting,
-        enableHiding: column.hidden ? true : false, // TODO
+        enableResizing: column.sizing,
+        enableHiding: column.hidden,
         cell: (props) => {
           if (column.source.includes('.')) {
             const nestedProperties = column.source.split('.');
@@ -119,11 +121,13 @@ const DataGrid: FC<IDataGridProps> = ({
               columns={ColumnsAux}
               currentElement={currentElement}
               emit={emit}
+              serverSideRef={serverSideRef}
             />
           ) : (
             <InfiniteScroll
               height={style?.height}
               datasource={ds}
+              displayFooter={displayFooter}
               columns={ColumnsAux}
               columnsVisibility={columnsVisibility}
               rowHeight={rowHeight}
@@ -133,6 +137,7 @@ const DataGrid: FC<IDataGridProps> = ({
               loader={loader}
               currentElement={currentElement}
               emit={emit}
+              serverSideRef={serverSideRef}
             />
           )}
         </>
