@@ -2,9 +2,17 @@ import { Table } from '@tanstack/react-table';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import DragAlongFooter from './DragAlongFooter';
 
-const TableFooter = ({ table, columnOrder }: { table: Table<any>; columnOrder: string[] }) => {
+const TableFooter = ({
+  table,
+  columnOrder,
+  infinite = false,
+}: {
+  table: Table<any>;
+  columnOrder: string[];
+  infinite?: boolean;
+}) => {
   return (
-    <tfoot className="footer text-left">
+    <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50`}>
       {table.getFooterGroups().map((footerGroup) => (
         <tr key={footerGroup.id} className={`flex tf-${footerGroup.id}`}>
           {footerGroup.headers.map((header) => (

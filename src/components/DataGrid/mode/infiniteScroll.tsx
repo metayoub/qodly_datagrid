@@ -25,7 +25,7 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { DataLoader } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
-import { TableVisibility, TableHeader, TableBodyScroll } from '../parts';
+import { TableVisibility, TableHeader, TableBodyScroll, TableFooter } from '../parts';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 
@@ -54,7 +54,9 @@ const InfiniteScroll = ({
   currentElement,
   height = '600px',
   saveState,
+  displayFooter,
   emit,
+  serverSideRef,
 }: {
   columns: ColumnDef<any, any>[];
   datasource: datasources.DataSource;
@@ -67,6 +69,8 @@ const InfiniteScroll = ({
   height: string | number | undefined;
   saveState: boolean;
   emit: TEmit;
+  serverSideRef: string;
+  displayFooter: boolean;
 }) => {
   //we need a reference to the scrolling element for logic down below
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -111,7 +115,7 @@ const InfiniteScroll = ({
   useEffect(() => {
     if (saveState) {
       // Load table settings from localStorage
-      const savedSettings = localStorage.getItem('tableSettings');
+      const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
       if (savedSettings) {
         const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
@@ -139,7 +143,7 @@ const InfiniteScroll = ({
             columnVisibility: newVisibilityState,
             columnOrder,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
         setColumnVisibility(updater);
       },
@@ -281,7 +285,7 @@ const InfiniteScroll = ({
             columnVisibility,
             columnOrder: newColumnOrder,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
       });
@@ -462,6 +466,7 @@ const InfiniteScroll = ({
               />
             )}
           </tbody>
+          {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
         </table>
       </DndContext>
     </div>

@@ -45,6 +45,7 @@ const Pagination = ({
   currentElement,
   saveState,
   emit,
+  serverSideRef,
 }: {
   paginationSize: number;
   displayFooter: boolean;
@@ -58,6 +59,7 @@ const Pagination = ({
   loader: DataLoader;
   saveState: boolean;
   emit: TEmit;
+  serverSideRef: string;
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
@@ -102,7 +104,7 @@ const Pagination = ({
   useEffect(() => {
     // Load table settings from localStorage
     if (saveState) {
-      const savedSettings = localStorage.getItem('tableSettings');
+      const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
       if (savedSettings) {
         const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
@@ -132,7 +134,7 @@ const Pagination = ({
             columnVisibility: newVisibilityState,
             columnOrder,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
 
         setColumnVisibility(updater);
@@ -168,7 +170,7 @@ const Pagination = ({
             columnVisibility,
             columnOrder: newColumnOrder,
           };
-          localStorage.setItem('tableSettings', JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
       });
