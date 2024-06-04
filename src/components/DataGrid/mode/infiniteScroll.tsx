@@ -9,6 +9,7 @@ import {
   ColumnDef,
   OnChangeFn,
   ColumnResizeMode,
+  ColumnSizingState,
 } from '@tanstack/react-table';
 // needed for table body level scope DnD setup
 import {
@@ -82,6 +83,7 @@ const InfiniteScroll = ({
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
+  const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -117,12 +119,29 @@ const InfiniteScroll = ({
       // Load table settings from localStorage
       const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
       if (savedSettings) {
-        const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
+        const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
         setColumnOrder(columnOrder);
+        setColumnSizing(columnSizing || {});
       }
     }
   }, []);
+
+  const setColumnSizingChange = (updater: any) => {
+    console.log(updater);
+
+    const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
+    // Save newVisibilityState to localStorage
+    if (saveState) {
+      const localStorageData = {
+        columnSizing: newColumnSizeState,
+        columnVisibility,
+        columnOrder,
+      };
+      localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+    }
+    setColumnSizing(updater);
+  };
 
   // Create the table and pass your options
   const tableOptions = useMemo(() => {
@@ -142,6 +161,7 @@ const InfiniteScroll = ({
           const localStorageData = {
             columnVisibility: newVisibilityState,
             columnOrder,
+            columnSizing,
           };
           localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
         }
@@ -149,14 +169,16 @@ const InfiniteScroll = ({
       },
       onColumnFiltersChange: setColumnFilters,
       getFilteredRowModel: getFilteredRowModel(),
+      onColumnSizingChange: setColumnSizingChange,
       state: {
+        columnSizing,
         sorting,
         columnVisibility,
         columnOrder,
         columnFilters,
       },
     };
-  }, [dataToDisplay, columnVisibility, columns, columnOrder, sorting, columnFilters]);
+  }, [dataToDisplay, columnVisibility, columns, columnOrder, sorting, columnFilters, columnSizing]);
 
   const table = useReactTable(tableOptions);
   const pageSize = useMemo(() => (datasource as any).pageSize, [datasource]);
@@ -283,6 +305,7 @@ const InfiniteScroll = ({
           // Save new column order along with current visibility state
           const localStorageData = {
             columnVisibility,
+            columnSizing,
             columnOrder: newColumnOrder,
           };
           localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
@@ -422,7 +445,7 @@ const InfiniteScroll = ({
         sensors={sensors}
       >
         {columnsVisibility && <TableVisibility table={table} />}
-        <table className="grid">
+        <table className="grid w-full">
           <TableHeader
             infinite={true}
             table={table}

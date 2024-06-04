@@ -52,7 +52,8 @@ const DataGrid: FC<IDataGridProps> = ({
         header: () => column.title,
         footer: () => column.title,
         enableSorting: column.sorting,
-        enableHiding: column.hidden ? true : false, // TODO
+        enableResizing: column.sizing,
+        enableHiding: column.hidden,
         cell: (props) => {
           if (column.source.includes('.')) {
             const nestedProperties = column.source.split('.');

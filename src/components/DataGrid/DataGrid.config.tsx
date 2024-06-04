@@ -208,6 +208,7 @@ export interface IColumn {
   source: string;
   sorting: boolean;
   hidden: boolean;
+  sizing: boolean;
   width: number;
   initialWidth?: number | string;
   format: string;
