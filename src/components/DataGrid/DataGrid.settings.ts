@@ -112,7 +112,7 @@ const commonSettings: TSetting[] = [
       },
       {
         label: 'Enable Sizing',
-        defaultValue: false,
+        defaultValue: true,
         type: ESetting.CHECKBOX,
         key: 'sizing',
       },

@@ -57,7 +57,7 @@ const InfiniteScroll = ({
   saveState,
   displayFooter,
   emit,
-  serverSideRef,
+  id,
 }: {
   columns: ColumnDef<any, any>[];
   datasource: datasources.DataSource;
@@ -70,7 +70,7 @@ const InfiniteScroll = ({
   height: string | number | undefined;
   saveState: boolean;
   emit: TEmit;
-  serverSideRef: string;
+  id: string;
   displayFooter: boolean;
 }) => {
   //we need a reference to the scrolling element for logic down below
@@ -117,7 +117,7 @@ const InfiniteScroll = ({
   useEffect(() => {
     if (saveState) {
       // Load table settings from localStorage
-      const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
+      const savedSettings = localStorage.getItem(`tableSettings_${id}`);
       if (savedSettings) {
         const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
@@ -128,8 +128,6 @@ const InfiniteScroll = ({
   }, []);
 
   const setColumnSizingChange = (updater: any) => {
-    console.log(updater);
-
     const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
     // Save newVisibilityState to localStorage
     if (saveState) {
@@ -138,7 +136,7 @@ const InfiniteScroll = ({
         columnVisibility,
         columnOrder,
       };
-      localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+      localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
     }
     setColumnSizing(updater);
   };
@@ -163,7 +161,7 @@ const InfiniteScroll = ({
             columnOrder,
             columnSizing,
           };
-          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
         setColumnVisibility(updater);
       },
@@ -308,7 +306,7 @@ const InfiniteScroll = ({
             columnSizing,
             columnOrder: newColumnOrder,
           };
-          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
       });
