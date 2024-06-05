@@ -9,6 +9,7 @@ import { useDoubleClick } from './hooks/useDoubleClick';
 import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
 import InfiniteScroll from './mode/infiniteScroll';
+import { useNode } from '@ws-ui/craftjs-core';
 
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
@@ -23,7 +24,6 @@ const DataGrid: FC<IDataGridProps> = ({
   style,
   className,
   classNames = [],
-  serverSideRef = '',
 }) => {
   const { connect, emit } = useRenderer({
     omittedEvents: [
@@ -42,6 +42,7 @@ const DataGrid: FC<IDataGridProps> = ({
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
+  const { id } = useNode();
 
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
@@ -121,7 +122,7 @@ const DataGrid: FC<IDataGridProps> = ({
               columns={ColumnsAux}
               currentElement={currentElement}
               emit={emit}
-              serverSideRef={serverSideRef}
+              id={id}
             />
           ) : (
             <InfiniteScroll
@@ -137,7 +138,7 @@ const DataGrid: FC<IDataGridProps> = ({
               loader={loader}
               currentElement={currentElement}
               emit={emit}
-              serverSideRef={serverSideRef}
+              id={id}
             />
           )}
         </>

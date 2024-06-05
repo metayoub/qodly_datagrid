@@ -46,7 +46,7 @@ const Pagination = ({
   currentElement,
   saveState,
   emit,
-  serverSideRef,
+  id,
 }: {
   paginationSize: number;
   displayFooter: boolean;
@@ -60,7 +60,7 @@ const Pagination = ({
   loader: DataLoader;
   saveState: boolean;
   emit: TEmit;
-  serverSideRef: string;
+  id: string;
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
@@ -106,7 +106,7 @@ const Pagination = ({
   useEffect(() => {
     // Load table settings from localStorage
     if (saveState) {
-      const savedSettings = localStorage.getItem(`tableSettings_${serverSideRef}`);
+      const savedSettings = localStorage.getItem(`tableSettings_${id}`);
       if (savedSettings) {
         const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
         setColumnVisibility(columnVisibility);
@@ -117,8 +117,6 @@ const Pagination = ({
   }, []);
 
   const setColumnSizingChange = (updater: any) => {
-    console.log(updater);
-
     const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
     // Save newVisibilityState to localStorage
     if (saveState) {
@@ -127,7 +125,7 @@ const Pagination = ({
         columnVisibility,
         columnOrder,
       };
-      localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+      localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
     }
     setColumnSizing(updater);
   };
@@ -154,7 +152,7 @@ const Pagination = ({
             columnOrder,
             columnSizing,
           };
-          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
 
         setColumnVisibility(updater);
@@ -192,7 +190,7 @@ const Pagination = ({
             columnSizing,
             columnOrder: newColumnOrder,
           };
-          localStorage.setItem(`tableSettings_${serverSideRef}`, JSON.stringify(localStorageData));
+          localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
       });

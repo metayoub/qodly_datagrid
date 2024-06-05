@@ -145,6 +145,7 @@ export default {
                   width: 150,
                   sorting: false,
                   hidden: true,
+                  sizing: true,
                   id: generate(),
                   ...(item.attribute.type === 'image'
                     ? {
