@@ -1,4 +1,4 @@
-import { useRenderer, useSources } from '@ws-ui/webform-editor';
+import { useRenderer, useSources, useEnhancedNode } from '@ws-ui/webform-editor';
 import cn from 'classnames';
 import { FC, useMemo } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -9,7 +9,6 @@ import { useDoubleClick } from './hooks/useDoubleClick';
 import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
 import InfiniteScroll from './mode/infiniteScroll';
-import { useNode } from '@ws-ui/craftjs-core';
 
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
@@ -42,7 +41,7 @@ const DataGrid: FC<IDataGridProps> = ({
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
-  const { id } = useNode();
+  const { id } = useEnhancedNode();
 
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
