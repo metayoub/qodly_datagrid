@@ -24,7 +24,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader } from '@ws-ui/webform-editor';
+import { DataLoader, unsubscribeFromDatasource } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBodyScroll, TableFooter } from '../parts';
 
@@ -324,13 +324,11 @@ const InfiniteScroll = ({
       return;
     }
 
-    setDataToDisplay((prev) => {
-      return [...prev, ...loader.page];
-    });
+    setDataToDisplay([...loader.page]);
     setData({
       length: loader.length,
       start: loader.start,
-      end: loader.end,
+      end: loader.start,
     });
     setLoading(false);
   }, [loader]);
@@ -370,6 +368,26 @@ const InfiniteScroll = ({
     }
     loader.sourceHasChanged().then(updateFromLoader);
   }, [loader]);
+
+  useEffect(() => {
+    if (!datasource) {
+      return;
+    }
+
+    const cb = async() => {
+
+    const end = pageSize< loader.length ?  pageSize : loader.length;
+      await loader
+        .fetchPage(0, end)
+        .then(updateFromLoader);
+    };
+
+    datasource.addListener('changed', cb);
+
+    return () => {
+      unsubscribeFromDatasource(datasource, cb);
+    };
+  }, [datasource,loader]);
 
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
   const fetchMoreOnBottomReached = useCallback(
