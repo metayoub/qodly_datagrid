@@ -23,7 +23,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader } from '@ws-ui/webform-editor';
+import { DataLoader, unsubscribeFromDatasource } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
@@ -102,6 +102,24 @@ const Pagination = ({
       emit('onheaderclick', params);
     },
   );
+
+  useEffect(() => {
+    if (!datasource) {
+      return;
+    }
+
+    const cb = async() => {
+      await loader
+        .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
+        .then(updateFromLoader);
+    };
+
+    datasource.addListener('changed', cb);
+
+    return () => {
+      unsubscribeFromDatasource(datasource, cb);
+    };
+  }, [datasource,loader]);
 
   useEffect(() => {
     // Load table settings from localStorage
@@ -240,7 +258,6 @@ const Pagination = ({
         await datasource.orderBy(sortingString);
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
-
       await loader
         .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
         .then(updateFromLoader);
