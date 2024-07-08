@@ -247,7 +247,7 @@ const InfiniteScroll = ({
 
     const end = start + pageSize < loader.length ? start + pageSize : loader.length;
     setLoading(true);
-    loader.fetchPage(start, end).then(updateFromLoader);
+    loader.fetchPage(start, end).then(() => updateFromLoader());
   };
 
   const currentDsNewPosition = async () => {
@@ -319,19 +319,27 @@ const InfiniteScroll = ({
     useSensor(KeyboardSensor, {}),
   );
 
-  const updateFromLoader = useCallback(() => {
-    if (!loader) {
-      return;
-    }
-
-    setDataToDisplay([...loader.page]);
-    setData({
-      length: loader.length,
-      start: loader.start,
-      end: loader.start,
-    });
-    setLoading(false);
-  }, [loader]);
+  const updateFromLoader = useCallback(
+    (reset?: boolean) => {
+      if (!loader) {
+        return;
+      }
+      if (reset) {
+        setDataToDisplay(loader.page);
+      } else {
+        setDataToDisplay((prev) => {
+          return [...prev, ...loader.page];
+        });
+      }
+      setData({
+        length: loader.length,
+        start: loader.start,
+        end: loader.end,
+      });
+      setLoading(false);
+    },
+    [loader],
+  );
 
   useEffect(() => {
     if (!loader || !datasource) {
@@ -366,20 +374,16 @@ const InfiniteScroll = ({
     if (!loader || !datasource) {
       return;
     }
-    loader.sourceHasChanged().then(updateFromLoader);
+    loader.sourceHasChanged().then(() => updateFromLoader());
   }, [loader]);
 
   useEffect(() => {
     if (!datasource) {
       return;
     }
-
-    const cb = async() => {
-
-    const end = pageSize< loader.length ?  pageSize : loader.length;
-      await loader
-        .fetchPage(0, end)
-        .then(updateFromLoader);
+    const cb = async () => {
+      const end = pageSize < loader.length ? pageSize : loader.length;
+      await loader.fetchPage(0, end).then(() => updateFromLoader(true));
     };
 
     datasource.addListener('changed', cb);
@@ -387,7 +391,7 @@ const InfiniteScroll = ({
     return () => {
       unsubscribeFromDatasource(datasource, cb);
     };
-  }, [datasource,loader]);
+  }, [datasource]);
 
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
   const fetchMoreOnBottomReached = useCallback(

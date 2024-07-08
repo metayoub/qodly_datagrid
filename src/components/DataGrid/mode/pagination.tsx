@@ -108,7 +108,7 @@ const Pagination = ({
       return;
     }
 
-    const cb = async() => {
+    const cb = async () => {
       await loader
         .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
         .then(updateFromLoader);
@@ -119,7 +119,7 @@ const Pagination = ({
     return () => {
       unsubscribeFromDatasource(datasource, cb);
     };
-  }, [datasource,loader]);
+  }, [datasource]);
 
   useEffect(() => {
     // Load table settings from localStorage
