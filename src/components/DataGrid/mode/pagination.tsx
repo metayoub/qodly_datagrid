@@ -119,7 +119,7 @@ const Pagination = ({
     return () => {
       unsubscribeFromDatasource(datasource, cb);
     };
-  }, [datasource]);
+  }, [datasource, currentPage]);
 
   useEffect(() => {
     // Load table settings from localStorage
@@ -237,6 +237,10 @@ const Pagination = ({
       setCurrentPage(1);
       setSelection((prev) => ({ ...prev, selectedPage: 1 }));
       return;
+    }
+    if (loader.length < pageSize) {
+      //search-> go back to page 1 to see rows..
+      setCurrentPage(1);
     }
     setData(loader.page);
     setTotal(loader.length);

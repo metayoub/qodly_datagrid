@@ -374,7 +374,7 @@ const InfiniteScroll = ({
     if (!loader || !datasource) {
       return;
     }
-    loader.sourceHasChanged().then(() => updateFromLoader());
+    loader.sourceHasChanged().then(() => updateFromLoader(true));
   }, [loader]);
 
   useEffect(() => {
@@ -417,7 +417,7 @@ const InfiniteScroll = ({
 
     const dsListener = () => {
       loader.sourceHasChanged().then(() => {
-        updateFromLoader();
+        updateFromLoader(true);
         if (isNumber(selectedIndex) && selectedIndex > -1) {
           currentDsNewPosition();
         }
