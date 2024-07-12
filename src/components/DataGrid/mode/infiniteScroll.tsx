@@ -247,7 +247,10 @@ const InfiniteScroll = ({
 
     const end = start + pageSize < loader.length ? start + pageSize : loader.length;
     setLoading(true);
-    loader.fetchPage(start, end).then(() => updateFromLoader());
+    loader.fetchPage(start, end).then(() => {
+      updateFromLoader();
+      setLoading(false);
+    });
   };
 
   const currentDsNewPosition = async () => {
@@ -451,7 +454,7 @@ const InfiniteScroll = ({
 
   return (
     <div
-      className="container relative overflow-auto block max-w-full"
+      className="container relative overflow-auto block s"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
       style={{
@@ -465,6 +468,7 @@ const InfiniteScroll = ({
         sensors={sensors}
       >
         {columnsVisibility && <TableVisibility table={table} />}
+        {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
         <table className="grid w-full">
           <TableHeader
             infinite={true}
@@ -480,34 +484,26 @@ const InfiniteScroll = ({
               height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
             }}
           >
-            {loading ? (
-              <tr>
-                <td colSpan={100}>
-                  <div className="loading">⏳</div>
-                </td>
-              </tr>
-            ) : (
-              <TableBodyScroll
-                table={table}
-                rowHeight={rowHeight}
-                columnOrder={columnOrder}
-                onRowClick={async (row) => {
-                  await updateCurrentDsValue({ index: row.index });
-                  emit('onselect', row.original);
-                  setSelectedIndex(row.index);
-                }}
-                rowVirtualizer={rowVirtualizer}
-                selectedIndex={selectedIndex}
-                oncellclick={handleCellClick}
-                onMouseEnter={({ rowIndex, source, value }) => {
-                  emit('oncellmouseenter', {
-                    row: rowIndex,
-                    name: source,
-                    value,
-                  });
-                }}
-              />
-            )}
+            <TableBodyScroll
+              table={table}
+              rowHeight={rowHeight}
+              columnOrder={columnOrder}
+              onRowClick={async (row) => {
+                await updateCurrentDsValue({ index: row.index });
+                emit('onselect', row.original);
+                setSelectedIndex(row.index);
+              }}
+              rowVirtualizer={rowVirtualizer}
+              selectedIndex={selectedIndex}
+              oncellclick={handleCellClick}
+              onMouseEnter={({ rowIndex, source, value }) => {
+                emit('oncellmouseenter', {
+                  row: rowIndex,
+                  name: source,
+                  value,
+                });
+              }}
+            />
           </tbody>
           {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
         </table>
