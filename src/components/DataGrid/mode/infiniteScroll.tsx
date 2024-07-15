@@ -24,7 +24,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader } from '@ws-ui/webform-editor';
+import { DataLoader, unsubscribeFromDatasource } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBodyScroll, TableFooter } from '../parts';
 
@@ -247,7 +247,10 @@ const InfiniteScroll = ({
 
     const end = start + pageSize < loader.length ? start + pageSize : loader.length;
     setLoading(true);
-    loader.fetchPage(start, end).then(updateFromLoader);
+    loader.fetchPage(start, end).then(() => {
+      updateFromLoader();
+      setLoading(false);
+    });
   };
 
   const currentDsNewPosition = async () => {
@@ -319,21 +322,27 @@ const InfiniteScroll = ({
     useSensor(KeyboardSensor, {}),
   );
 
-  const updateFromLoader = useCallback(() => {
-    if (!loader) {
-      return;
-    }
-
-    setDataToDisplay((prev) => {
-      return [...prev, ...loader.page];
-    });
-    setData({
-      length: loader.length,
-      start: loader.start,
-      end: loader.end,
-    });
-    setLoading(false);
-  }, [loader]);
+  const updateFromLoader = useCallback(
+    (reset?: boolean) => {
+      if (!loader) {
+        return;
+      }
+      if (reset) {
+        setDataToDisplay(loader.page);
+      } else {
+        setDataToDisplay((prev) => {
+          return [...prev, ...loader.page];
+        });
+      }
+      setData({
+        length: loader.length,
+        start: loader.start,
+        end: loader.end,
+      });
+      setLoading(false);
+    },
+    [loader],
+  );
 
   useEffect(() => {
     if (!loader || !datasource) {
@@ -368,8 +377,24 @@ const InfiniteScroll = ({
     if (!loader || !datasource) {
       return;
     }
-    loader.sourceHasChanged().then(updateFromLoader);
+    loader.sourceHasChanged().then(() => updateFromLoader(true));
   }, [loader]);
+
+  useEffect(() => {
+    if (!datasource) {
+      return;
+    }
+    const cb = async () => {
+      const end = pageSize < loader.length ? pageSize : loader.length;
+      await loader.fetchPage(0, end).then(() => updateFromLoader(true));
+    };
+
+    datasource.addListener('changed', cb);
+
+    return () => {
+      unsubscribeFromDatasource(datasource, cb);
+    };
+  }, [datasource]);
 
   //called on scroll and possibly on mount to fetch more data as the user scrolls and reaches bottom of table
   const fetchMoreOnBottomReached = useCallback(
@@ -395,7 +420,7 @@ const InfiniteScroll = ({
 
     const dsListener = () => {
       loader.sourceHasChanged().then(() => {
-        updateFromLoader();
+        updateFromLoader(true);
         if (isNumber(selectedIndex) && selectedIndex > -1) {
           currentDsNewPosition();
         }
@@ -429,7 +454,7 @@ const InfiniteScroll = ({
 
   return (
     <div
-      className="container relative overflow-auto block max-w-full"
+      className="container relative overflow-auto block s"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
       style={{
@@ -443,6 +468,7 @@ const InfiniteScroll = ({
         sensors={sensors}
       >
         {columnsVisibility && <TableVisibility table={table} />}
+        {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
         <table className="grid w-full">
           <TableHeader
             infinite={true}
@@ -458,34 +484,26 @@ const InfiniteScroll = ({
               height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
             }}
           >
-            {loading ? (
-              <tr>
-                <td colSpan={100}>
-                  <div className="loading">⏳</div>
-                </td>
-              </tr>
-            ) : (
-              <TableBodyScroll
-                table={table}
-                rowHeight={rowHeight}
-                columnOrder={columnOrder}
-                onRowClick={async (row) => {
-                  await updateCurrentDsValue({ index: row.index });
-                  emit('onselect', row.original);
-                  setSelectedIndex(row.index);
-                }}
-                rowVirtualizer={rowVirtualizer}
-                selectedIndex={selectedIndex}
-                oncellclick={handleCellClick}
-                onMouseEnter={({ rowIndex, source, value }) => {
-                  emit('oncellmouseenter', {
-                    row: rowIndex,
-                    name: source,
-                    value,
-                  });
-                }}
-              />
-            )}
+            <TableBodyScroll
+              table={table}
+              rowHeight={rowHeight}
+              columnOrder={columnOrder}
+              onRowClick={async (row) => {
+                await updateCurrentDsValue({ index: row.index });
+                emit('onselect', row.original);
+                setSelectedIndex(row.index);
+              }}
+              rowVirtualizer={rowVirtualizer}
+              selectedIndex={selectedIndex}
+              oncellclick={handleCellClick}
+              onMouseEnter={({ rowIndex, source, value }) => {
+                emit('oncellmouseenter', {
+                  row: rowIndex,
+                  name: source,
+                  value,
+                });
+              }}
+            />
           </tbody>
           {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
         </table>
