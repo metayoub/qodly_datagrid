@@ -119,7 +119,7 @@ const Pagination = ({
     return () => {
       unsubscribeFromDatasource(datasource, cb);
     };
-  }, [datasource, currentPage]);
+  }, [datasource, currentPage, pageSize]);
 
   useEffect(() => {
     // Load table settings from localStorage
