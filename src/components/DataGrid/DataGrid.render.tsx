@@ -12,7 +12,6 @@ import InfiniteScroll from './mode/infiniteScroll';
 
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
-  paginationSize = 10,
   displayFooter = true,
   rowHeight,
   headerHeight,
@@ -110,7 +109,6 @@ const DataGrid: FC<IDataGridProps> = ({
           {variant === 'pagination' ? (
             <Pagination
               loader={loader}
-              paginationSize={paginationSize}
               displayFooter={displayFooter}
               rowHeight={rowHeight}
               headerHeight={headerHeight}

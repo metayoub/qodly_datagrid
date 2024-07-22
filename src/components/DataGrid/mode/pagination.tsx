@@ -34,7 +34,6 @@ import {
 } from '../hooks/useDsChangeHandler';
 
 const Pagination = ({
-  paginationSize,
   displayFooter,
   rowHeight,
   headerHeight,
@@ -48,7 +47,6 @@ const Pagination = ({
   emit,
   id,
 }: {
-  paginationSize: number;
   displayFooter: boolean;
   rowHeight: number;
   headerHeight: number;
@@ -65,7 +63,9 @@ const Pagination = ({
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(paginationSize);
+  const [pageSize, setPageSize] = useState(
+    datasource.getPageSize() != 0 ? datasource.getPageSize() : 10,
+  );
   const [loading, setLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});

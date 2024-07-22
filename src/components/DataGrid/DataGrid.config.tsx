@@ -177,7 +177,6 @@ export default {
   defaultProps: {
     headerHeight: 36,
     rowHeight: 30,
-    paginationSize: 10,
     displayFooter: true,
     saveState: true,
     columnsVisibility: false,
@@ -195,7 +194,6 @@ export interface IDataGridProps extends webforms.ComponentProps {
   variant?: string;
   headerHeight: number;
   rowHeight: number;
-  paginationSize: number;
   displayFooter: boolean;
   saveState: boolean;
   columnsVisibility: boolean;
