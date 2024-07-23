@@ -75,7 +75,7 @@ const DataGrid: FC<IDataGridProps> = ({
       },
     );
     setData(initialData);
-  }, [style?.height, columns, 10, variant, divElement]);
+  }, [style?.height, columns, variant, divElement]);
 
   const table = useReactTable({
     data,

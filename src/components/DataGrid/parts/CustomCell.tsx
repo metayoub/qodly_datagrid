@@ -2,13 +2,31 @@ import { formatValue } from '@ws-ui/webform-editor';
 import { MdCheck, MdClose } from 'react-icons/md';
 // import { DataType, getStyle } from '@ws-ui/formatter';
 
-const CustomCell = ({ format, dataType, value }: { format: any; dataType: string; value: any }) => {
+const CustomCell = ({
+  format,
+  dataType,
+  value,
+  rowHeight,
+}: {
+  format: any;
+  dataType: string;
+  value: any;
+  rowHeight: number;
+}) => {
   switch (true) {
     case value && typeof value === 'object' && !(value instanceof Date):
       return (
         <>
           {dataType === 'image' && value?.__deferred?.image ? (
-            <img className="image h-10 w-10" src={value?.__deferred?.uri} alt="" />
+            <img
+              className="image"
+              src={value?.__deferred?.uri}
+              alt=""
+              style={{
+                width: rowHeight,
+                height: rowHeight,
+              }}
+            />
           ) : (
             JSON.stringify(value)
           )}

@@ -60,13 +60,21 @@ const DataGrid: FC<IDataGridProps> = ({
             nestedProperties.forEach((property) => {
               value = props.row.original[column.source] || value[property];
             });
-            return <CustomCell value={value} format={column.format} dataType={column.dataType} />;
+            return (
+              <CustomCell
+                value={value}
+                format={column.format}
+                dataType={column.dataType}
+                rowHeight={rowHeight}
+              />
+            );
           }
           return (
             <CustomCell
               value={props.getValue()}
               format={column.format}
               dataType={column.dataType}
+              rowHeight={rowHeight}
             />
           );
         },
