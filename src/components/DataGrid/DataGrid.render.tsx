@@ -12,7 +12,6 @@ import InfiniteScroll from './mode/infiniteScroll';
 
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
-  paginationSize = 10,
   displayFooter = true,
   rowHeight,
   headerHeight,
@@ -61,13 +60,21 @@ const DataGrid: FC<IDataGridProps> = ({
             nestedProperties.forEach((property) => {
               value = props.row.original[column.source] || value[property];
             });
-            return <CustomCell value={value} format={column.format} dataType={column.dataType} />;
+            return (
+              <CustomCell
+                value={value}
+                format={column.format}
+                dataType={column.dataType}
+                rowHeight={rowHeight}
+              />
+            );
           }
           return (
             <CustomCell
               value={props.getValue()}
               format={column.format}
               dataType={column.dataType}
+              rowHeight={rowHeight}
             />
           );
         },
@@ -110,7 +117,6 @@ const DataGrid: FC<IDataGridProps> = ({
           {variant === 'pagination' ? (
             <Pagination
               loader={loader}
-              paginationSize={paginationSize}
               displayFooter={displayFooter}
               rowHeight={rowHeight}
               headerHeight={headerHeight}

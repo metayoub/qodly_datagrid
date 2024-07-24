@@ -2,6 +2,7 @@ import { Table } from '@tanstack/react-table';
 import divide from 'lodash/divide';
 import ceil from 'lodash/ceil';
 import { MdNavigateNext, MdNavigateBefore, MdFirstPage, MdLastPage } from 'react-icons/md';
+import { useMemo } from 'react';
 
 const TablePagination = ({
   table,
@@ -18,6 +19,7 @@ const TablePagination = ({
   pageSize: number;
   setPageSize: (pageSize: number) => void;
 }) => {
+  const initPageSize = useMemo(() => pageSize, []); //to display the stable default size in the select
   return (
     <>
       <div className="flex justify-between items-center flex-1 hidden">
@@ -45,11 +47,17 @@ const TablePagination = ({
                 setPageSize(Number(e.target.value));
               }}
             >
-              {[10, 25, 50, 100].map((pageSize) => (
-                <option key={pageSize} value={pageSize}>
-                  {pageSize}
-                </option>
-              ))}
+              {![10, 20, 25, 50, 100].includes(initPageSize)
+                ? [initPageSize, 10, 20, 25, 50, 100].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))
+                : [10, 20, 25, 50, 100].map((pageSize) => (
+                    <option key={pageSize} value={pageSize}>
+                      {pageSize}
+                    </option>
+                  ))}
             </select>
             <span className="text-sm font-medium">per page</span>
           </label>
@@ -102,11 +110,17 @@ const TablePagination = ({
                   setPageSize(Number(e.target.value));
                 }}
               >
-                {[10, 25, 50, 100].map((pageSize) => (
-                  <option key={pageSize} value={pageSize}>
-                    {pageSize}
-                  </option>
-                ))}
+                {![10, 20, 25, 50, 100].includes(initPageSize)
+                  ? [initPageSize, 10, 20, 25, 50, 100].map((pageSize) => (
+                      <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                      </option>
+                    ))
+                  : [10, 20, 25, 50, 100].map((pageSize) => (
+                      <option key={pageSize} value={pageSize}>
+                        {pageSize}
+                      </option>
+                    ))}
               </select>
               <span className="text-sm font-medium">per page</span>
             </label>

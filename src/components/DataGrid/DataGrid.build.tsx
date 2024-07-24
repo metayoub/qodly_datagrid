@@ -21,7 +21,6 @@ const DataGrid: FC<IDataGridProps> = ({
   variant = 'pagination',
   headerHeight,
   rowHeight,
-  paginationSize = 10,
   className,
   classNames = [],
   columnsVisibility,
@@ -68,7 +67,7 @@ const DataGrid: FC<IDataGridProps> = ({
   useEffect(() => {
     const initialData = Array.from(
       {
-        length: variant === 'pagination' ? paginationSize : calculateHeight(style?.height),
+        length: variant === 'pagination' ? 10 : calculateHeight(style?.height),
       },
       () => {
         const obj = mapValues(keyBy(columns, 'source'), (value) => value.title);
@@ -76,7 +75,7 @@ const DataGrid: FC<IDataGridProps> = ({
       },
     );
     setData(initialData);
-  }, [style?.height, columns, paginationSize, variant, divElement]);
+  }, [style?.height, columns, variant, divElement]);
 
   const table = useReactTable({
     data,
