@@ -23,7 +23,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader, unsubscribeFromDatasource } from '@ws-ui/webform-editor';
+import { DataLoader, unsubscribeFromDatasource, useWebformPath } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
@@ -44,6 +44,7 @@ const Pagination = ({
   loader,
   currentElement,
   saveState,
+  state = '',
   emit,
   id,
 }: {
@@ -57,6 +58,7 @@ const Pagination = ({
   columns: ColumnDef<any, any>[];
   loader: DataLoader;
   saveState: boolean;
+  state?: string;
   emit: TEmit;
   id: string;
 }) => {
@@ -75,7 +77,8 @@ const Pagination = ({
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [selection, setSelection] = useState({ selectedIndex: -1, selectedPage: -1 });
-
+  const path = useWebformPath();
+  const stateDS = window.DataSource.getSource(state, path);
   const emitCellEvent = (
     eventName: string,
     { source, rowIndex, value }: { source: string; rowIndex: number; value: any },
@@ -122,27 +125,39 @@ const Pagination = ({
   }, [datasource, currentPage, pageSize]);
 
   useEffect(() => {
-    // Load table settings from localStorage
-    if (saveState) {
-      const savedSettings = localStorage.getItem(`tableSettings_${id}`);
-      if (savedSettings) {
-        const { columnVisibility, columnOrder } = JSON.parse(savedSettings);
-        setColumnVisibility(columnVisibility);
-        setColumnOrder(columnOrder);
-        setColumnSizing(columnSizing || {});
+    const getValue = async () => {
+      if (stateDS) {
+        const dsValue = await stateDS?.value;
+        if (dsValue.columnVisibility) setColumnVisibility(dsValue.columnVisibility);
+        if (dsValue.columnOrder) setColumnOrder(dsValue.columnOrder);
+        if (dsValue.columnSizing) setColumnSizing(dsValue.columnSizing);
+      } else if (saveState) {
+        // Load table settings from localStorage in case it not saved in DB
+        const savedSettings = localStorage.getItem(`tableSettings_${id}`);
+        if (savedSettings) {
+          const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
+          setColumnVisibility(columnVisibility);
+          setColumnOrder(columnOrder);
+          setColumnSizing(columnSizing || {});
+        }
       }
-    }
+    };
+    getValue();
   }, []);
 
   const setColumnSizingChange = (updater: any) => {
     const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
+    const localStorageData = {
+      columnSizing: newColumnSizeState,
+      columnVisibility,
+      columnOrder,
+    };
     // Save newVisibilityState to localStorage
+    if (stateDS) {
+      stateDS.setValue(null, localStorageData);
+      emit('onsavestate');
+    }
     if (saveState) {
-      const localStorageData = {
-        columnSizing: newColumnSizeState,
-        columnVisibility,
-        columnOrder,
-      };
       localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
     }
     setColumnSizing(updater);
@@ -163,13 +178,17 @@ const Pagination = ({
       onColumnVisibilityChange: (updater: any) => {
         const newVisibilityState =
           updater instanceof Function ? updater(columnVisibility) : updater;
+        const localStorageData = {
+          columnVisibility: newVisibilityState,
+          columnOrder,
+          columnSizing,
+        };
+        if (stateDS) {
+          stateDS.setValue(null, localStorageData);
+          emit('onsavestate');
+        }
         // Save newVisibilityState to localStorage
         if (saveState) {
-          const localStorageData = {
-            columnVisibility: newVisibilityState,
-            columnOrder,
-            columnSizing,
-          };
           localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
 
@@ -200,14 +219,17 @@ const Pagination = ({
         const oldIndex = columnOrder.indexOf(active.id as string);
         const newIndex = columnOrder.indexOf(over.id as string);
         const newColumnOrder = arrayMove(columnOrder, oldIndex, newIndex);
-
+        const localStorageData = {
+          columnVisibility,
+          columnSizing,
+          columnOrder: newColumnOrder,
+        };
+        if (stateDS) {
+          stateDS.setValue(null, localStorageData);
+          emit('onsavestate');
+        }
         if (saveState) {
           // Save new column order along with current visibility state
-          const localStorageData = {
-            columnVisibility,
-            columnSizing,
-            columnOrder: newColumnOrder,
-          };
           localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
         }
         return newColumnOrder;
