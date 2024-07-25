@@ -10,11 +10,12 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 | -------------------------------------- | -------- | --------- |
 | Customizable columns                   | ✔️       |           |
 | Sorting                                | ✔️       | ✔️        |
-| Filtering                              | ✔️       |           |
+| Filtering                              |          |           |
 | ReOrder                                | ✔️       | ✔️        |
 | Infinite scrolling (Virtual scrolling) | ✔️       | ✔️        |
-| Pagination                             | ✔️       | ✔️        |
+| Pagination                             | ✔️       |           |
 | Sticky Header                          | ✔️       | ✔️        |
+| Save state in Qodly Source             | ✔️       |           |
 | Save state in localStorage             | ✔️       |           |
 | Resizing                               | ✔️       | ✔️        |
 | AutoFit                                |          |           |
@@ -29,20 +30,38 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 ## TODO:
 
-- Search in column : On going
+- Search in column : need POC
 - AutoFIt : need POC
 - Styling (CSS) : On going
 - Editable cells : need POC
-- Save State in a dataSource : On going
 - Remove Unnecessary properties
 - Tested with Array of object
 
 ## Save State
 
-You can save the state of column visibility and order using `localStorage`:
+You can save the state of column visibility, Size and order using `Qodly Source` or `localStorage`:
 
 - **Column Visibility**: Toggle column visibility, and changes will be automatically saved.
+- **Column Size**: Change the Size of the column and make it suitable for your screen, the new sizes will be saved.
 - **Column Order**: Reorder columns by dragging and dropping them, and the new order will be saved.
+
+`localStorage` will only work when the DataGrid is not linked to any `Qodly Source`.
+
+## Triggers and Events
+
+The DataGrid component can respond to various events, enabling dynamic user experiences.
+
+- **On Select**: Calls for an action when an item within the component is selected.
+- **On Click**: Calls for an action when the user clicks on the component.
+- **On DoubleClick**: Calls for an action when the user double-clicks on the component.
+- **On HeaderClick**: Calls for an action when the user clicks on the header of a column.
+- **On HeaderDoubleClick**: Calls for an action when the user double-clicks on the header of a column.
+- **On CellClick**: Calls for an action when the user clicks on a cell within the component.
+- **On CellDoubleClick**: Calls for an action when the user double-clicks on a cell within the component.
+- **On MouseEnter**: Calls for an action when the user's mouse cursor enters the area of the component.
+- **On MouseLeave**: Calls for an action when the user's mouse cursor exits the area of the component.
+- **On MouseOver**: Calls for an action when the user's mouse cursor is over the area of the component.
+- **On SaveState**: Calls for an action when the user change the component's state.
 
 ## Styling
 

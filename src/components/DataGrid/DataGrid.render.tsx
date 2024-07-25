@@ -10,6 +10,13 @@ import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
 import InfiniteScroll from './mode/infiniteScroll';
 
+declare global {
+  interface Window {
+    DataSource: {
+      getSource: (state: string, path: string) => any;
+    };
+  }
+}
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
   displayFooter = true,
@@ -19,6 +26,7 @@ const DataGrid: FC<IDataGridProps> = ({
   filter,
   variant = 'pagination',
   saveState,
+  state,
   style,
   className,
   classNames = [],
@@ -35,13 +43,15 @@ const DataGrid: FC<IDataGridProps> = ({
       'oncelldblclick',
       'oncellmouseenter',
       'oncellmouseleave',
+      'onsavestate',
     ],
   });
+
   const {
     sources: { datasource: ds, currentElement },
   } = useSources({ acceptIteratorSel: true });
-  const { id } = useEnhancedNode();
 
+  const { id } = useEnhancedNode();
   const columnHelper = createColumnHelper<any>();
   const ColumnsAux = columns
     .filter((column) => column.source !== '')
@@ -123,6 +133,7 @@ const DataGrid: FC<IDataGridProps> = ({
               columnsVisibility={columnsVisibility}
               filter={filter}
               saveState={saveState}
+              state={state}
               datasource={ds}
               columns={ColumnsAux}
               currentElement={currentElement}
@@ -140,6 +151,7 @@ const DataGrid: FC<IDataGridProps> = ({
               headerHeight={headerHeight}
               filter={filter}
               saveState={saveState}
+              state={state}
               loader={loader}
               currentElement={currentElement}
               emit={emit}

@@ -120,6 +120,11 @@ const dataAccessSettings: TSetting[] = [
     type: ESetting.DS_AUTO_SUGGEST,
   },
   {
+    key: 'state',
+    label: 'State Source',
+    type: ESetting.DS_AUTO_SUGGEST,
+  },
+  {
     key: 'serverSideRef',
     label: 'Server Side',
     type: ESetting.TEXT_FIELD,

@@ -50,6 +50,7 @@ export default {
       keys: [
         { name: 'datasource', require: true, isDatasource: true },
         { name: 'currentElement', require: false, isDatasource: false },
+        { name: 'state', require: false, isDatasource: false },
       ],
     },
     exposed: true,
@@ -62,6 +63,10 @@ export default {
       {
         label: 'On Click',
         value: 'onclick',
+      },
+      {
+        label: 'On SaveState',
+        value: 'onsavestate',
       },
       {
         label: 'On DoubleClick',
@@ -182,6 +187,7 @@ export default {
     columnsVisibility: false,
     filter: true,
     columns: [],
+    state: '',
     variant: 'infinite',
     style: {
       width: 'fit-content',
@@ -191,6 +197,7 @@ export default {
 } as T4DComponentConfig<IDataGridProps>;
 
 export interface IDataGridProps extends webforms.ComponentProps {
+  state?: string;
   variant?: string;
   headerHeight: number;
   rowHeight: number;
