@@ -10,11 +10,12 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 | -------------------------------------- | -------- | --------- |
 | Customizable columns                   | ✔️       |           |
 | Sorting                                | ✔️       | ✔️        |
-| Filtering                              | ✔️       |           |
+| Filtering                              |          |           |
 | ReOrder                                | ✔️       | ✔️        |
 | Infinite scrolling (Virtual scrolling) | ✔️       | ✔️        |
-| Pagination                             | ✔️       | ✔️        |
+| Pagination                             | ✔️       |           |
 | Sticky Header                          | ✔️       | ✔️        |
+| Save state in Qodly Source             | ✔️       |           |
 | Save state in localStorage             | ✔️       |           |
 | Resizing                               | ✔️       | ✔️        |
 | AutoFit                                |          |           |
@@ -29,20 +30,22 @@ DataGrid's Qodly component using [react-table](https://github.com/TanStack/table
 
 ## TODO:
 
-- Search in column : On going
+- Search in column : need POC
 - AutoFIt : need POC
 - Styling (CSS) : On going
 - Editable cells : need POC
-- Save State in a dataSource : On going
 - Remove Unnecessary properties
 - Tested with Array of object
 
 ## Save State
 
-You can save the state of column visibility and order using `localStorage`:
+You can save the state of column visibility, Size and order using `Qodly Source` or `localStorage`:
 
 - **Column Visibility**: Toggle column visibility, and changes will be automatically saved.
+- **Column Size**: Change the Size of the column and make it suitable for your screen, the new sizes will be saved.
 - **Column Order**: Reorder columns by dragging and dropping them, and the new order will be saved.
+
+`localStorage` will only work when the DataGrid is not linked to any `Qodly Source`.
 
 ## Styling
 
