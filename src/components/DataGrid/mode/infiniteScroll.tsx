@@ -118,6 +118,18 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
+    //manage array case (display+sorting)
+    const displayArray = async () => {
+      if (datasource.dataType === 'array') {
+        const dsValue = await datasource.getValue();
+        setDataToDisplay(dsValue);
+      }
+    };
+
+    displayArray();
+  }, [datasource, sorting]);
+
+  useEffect(() => {
     const getValue = async () => {
       if (stateDS) {
         const dsValue = await stateDS?.value;
@@ -397,14 +409,14 @@ const InfiniteScroll = ({
   }, [sorting]);
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     loader.sourceHasChanged().then(() => updateFromLoader(true));
   }, [loader]);
 
   useEffect(() => {
-    if (!datasource) {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
     const cb = async () => {
@@ -437,7 +449,7 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
 

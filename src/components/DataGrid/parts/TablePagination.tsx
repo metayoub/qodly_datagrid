@@ -110,7 +110,7 @@ const TablePagination = ({
                   setPageSize(Number(e.target.value));
                 }}
               >
-                {![10, 20, 25, 50, 100].includes(initPageSize)
+                {![10, 20, 25, 50, 100].includes(initPageSize) && initPageSize != null
                   ? [initPageSize, 10, 20, 25, 50, 100].map((pageSize) => (
                       <option key={pageSize} value={pageSize}>
                         {pageSize}

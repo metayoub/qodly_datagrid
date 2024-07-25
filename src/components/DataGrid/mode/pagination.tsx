@@ -145,6 +145,21 @@ const Pagination = ({
     getValue();
   }, []);
 
+  useEffect(() => {
+    //manage array case (display+sorting)
+    const displayArray = async () => {
+      if (datasource.dataType === 'array') {
+        const dsValue = await datasource.getValue();
+        //paginate
+        setPageSize(pageSize != null ? pageSize : 10); //by default 10 for arrays
+        setTotal(dsValue.length);
+        setData(dsValue.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+        setLoading(false);
+      }
+    };
+    displayArray();
+  }, [datasource, pageSize, currentPage, sorting]);
+
   const setColumnSizingChange = (updater: any) => {
     const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
     const localStorageData = {
@@ -289,7 +304,14 @@ const Pagination = ({
         .then(updateFromLoader);
       // await currentDsNewPosition();
     };
-
+    //array case
+    if (datasource.dataType === 'array') {
+      setLoading(false);
+      if (currentPage === 0) {
+        setCurrentPage(1);
+      }
+      return;
+    }
     setLoading(true);
     updateDataFromSorting();
   }, [currentPage, pageSize, sorting, selection]);
