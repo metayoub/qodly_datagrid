@@ -112,9 +112,7 @@ const Pagination = ({
     }
 
     const cb = async () => {
-      await loader
-        .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
-        .then(updateFromLoader);
+      await loader.fetchPage((currentPage - 1) * pageSize).then(updateFromLoader);
     };
 
     datasource.addListener('changed', cb);
@@ -284,9 +282,7 @@ const Pagination = ({
         await datasource.orderBy(sortingString);
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
-      await loader
-        .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
-        .then(updateFromLoader);
+      await loader.fetchPage((currentPage - 1) * pageSize).then(updateFromLoader);
       // await currentDsNewPosition();
     };
 
