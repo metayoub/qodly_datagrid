@@ -32,6 +32,7 @@ import {
   getParentEntitySel,
   updateEntity,
 } from '../hooks/useDsChangeHandler';
+import orderBy from 'lodash/orderBy';
 
 const Pagination = ({
   displayFooter,
@@ -144,21 +145,6 @@ const Pagination = ({
     };
     getValue();
   }, []);
-
-  useEffect(() => {
-    //manage array case (display+sorting)
-    const displayArray = async () => {
-      if (datasource.dataType === 'array') {
-        const dsValue = await datasource.getValue();
-        //paginate
-        setPageSize(pageSize != null ? pageSize : 10); //by default 10 for arrays
-        setTotal(dsValue.length);
-        setData(dsValue.slice((currentPage - 1) * pageSize, currentPage * pageSize));
-        setLoading(false);
-      }
-    };
-    displayArray();
-  }, [datasource, pageSize, currentPage, sorting]);
 
   const setColumnSizingChange = (updater: any) => {
     const newColumnSizeState = updater instanceof Function ? updater(columnSizing) : updater;
@@ -284,37 +270,57 @@ const Pagination = ({
     setLoading(false);
   }, [loader, currentPage]);
 
+  const loadArray = (dsValue: any, sorting: SortingState) => {
+    if (sorting.length > 0) {
+      dsValue = orderBy(
+        dsValue,
+        sorting.map((e) => e.id),
+        sorting.map((e) => (e.desc ? 'desc' : 'asc')),
+      );
+    }
+
+    if (dsValue.length < pageSize) {
+      //search-> go back to page 1 to see rows..
+      setCurrentPage(1);
+    }
+    setPageSize(pageSize ? pageSize : 10);
+    if (currentPage === 0) {
+      setCurrentPage(1);
+    }
+    setTotal(dsValue.length);
+    setData(dsValue.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+    setLoading(false);
+  };
+
   useEffect(() => {
     if (!loader || !datasource) {
       return;
     }
+
     const updateDataFromSorting = async () => {
-      if (sorting.length > 0) {
-        const sortingString = sorting
-          .map(
-            ({ id: columnId, desc: isDescending }) =>
-              `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
-          )
-          .join(',');
-        await datasource.orderBy(sortingString);
+      if (datasource.dataType === 'array') {
+        let dsValue = await datasource.getValue();
+        loadArray(dsValue, sorting);
+      } else {
+        if (sorting.length > 0) {
+          const sortingString = sorting
+            .map(
+              ({ id: columnId, desc: isDescending }) =>
+                `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
+            )
+            .join(',');
+          await datasource.orderBy(sortingString);
+        }
+        await loader
+          .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
+          .then(updateFromLoader);
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
-      await loader
-        .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
-        .then(updateFromLoader);
       // await currentDsNewPosition();
     };
-    //array case
-    if (datasource.dataType === 'array') {
-      setLoading(false);
-      if (currentPage === 0) {
-        setCurrentPage(1);
-      }
-      return;
-    }
     setLoading(true);
     updateDataFromSorting();
-  }, [currentPage, pageSize, sorting, selection]);
+  }, [currentPage, pageSize, sorting, selection.selectedPage]);
 
   // handle selelctElement
   const currentDsChangeHandler = useCallback(async () => {
@@ -355,7 +361,7 @@ const Pagination = ({
         break;
       }
     }
-  }, [currentElement, loader]);
+  }, [currentElement, loader]); // do we need loader here?
 
   const updateCurrentDsValue = async ({
     index,
