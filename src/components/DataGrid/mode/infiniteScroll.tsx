@@ -384,21 +384,25 @@ const InfiniteScroll = ({
       return;
     }
     const updateDataFromSorting = async () => {
-      const { id: columnId, desc: isDescending } = sorting[0];
-      // Sorting is an object [desc: boolean, id: string]
-      // workaround until the fix is delivered
-      await (datasource?.orderBy as any)(`${columnId} ${isDescending ? 'desc' : 'asc'}`, {
-        first: 0,
-        size: pageSize,
-      }).then((value: any) => {
-        setData({
-          length: value._private.selLength,
-          start: value._private.curPage.first,
-          end: value._private.curPage.first + value._private.curPage.size,
+      const sortingString = sorting
+        .map(
+          ({ id: columnId, desc: isDescending }) => `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
+        )
+        .join(',');
+      await datasource
+        .orderBy(sortingString, {
+          first: 0,
+          size: pageSize,
+        })
+        .then((value: any) => {
+          setData({
+            length: value._private.selLength,
+            start: value._private.curPage.first,
+            end: value._private.curPage.first + value._private.curPage.size,
+          });
+          setDataToDisplay(value._private.curPage.entitiesDef);
+          setLoading(false);
         });
-        setDataToDisplay(value._private.curPage.entitiesDef);
-        setLoading(false);
-      });
       // TODO: Select the first Element
     };
 
