@@ -17,7 +17,7 @@ const CustomCell = ({
     case value && typeof value === 'object' && !(value instanceof Date):
       return (
         <>
-          {dataType === 'image' && value?.__deferred?.image ? (
+          {value?.__deferred?.image ? (
             <img
               className="image"
               src={value?.__deferred?.uri}
