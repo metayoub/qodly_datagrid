@@ -9,6 +9,7 @@ import {
   ColumnDef,
   ColumnResizeMode,
   ColumnSizingState,
+  OnChangeFn,
 } from '@tanstack/react-table';
 // needed for table body level scope DnD setup
 import {
@@ -72,7 +73,7 @@ const Pagination = ({
   const [loading, setLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnSorting, setColumnSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
@@ -132,14 +133,17 @@ const Pagination = ({
         if (dsValue.columnVisibility) setColumnVisibility(dsValue.columnVisibility);
         if (dsValue.columnOrder) setColumnOrder(dsValue.columnOrder);
         if (dsValue.columnSizing) setColumnSizing(dsValue.columnSizing);
+        if (dsValue.columnSorting) setColumnSorting(dsValue.columnSorting);
       } else if (saveState) {
         // Load table settings from localStorage in case it not saved in DB
         const savedSettings = localStorage.getItem(`tableSettings_${id}`);
         if (savedSettings) {
-          const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
+          const { columnVisibility, columnOrder, columnSizing, columnSorting } =
+            JSON.parse(savedSettings);
           setColumnVisibility(columnVisibility);
           setColumnOrder(columnOrder);
           setColumnSizing(columnSizing || {});
+          setColumnSorting(columnSorting);
         }
       }
     };
@@ -152,6 +156,7 @@ const Pagination = ({
       columnSizing: newColumnSizeState,
       columnVisibility,
       columnOrder,
+      columnSorting,
     };
     // Save newVisibilityState to localStorage
     if (stateDS) {
@@ -183,6 +188,7 @@ const Pagination = ({
           columnVisibility: newVisibilityState,
           columnOrder,
           columnSizing,
+          columnSorting,
         };
         if (stateDS) {
           stateDS.setValue(null, localStorageData);
@@ -195,21 +201,45 @@ const Pagination = ({
 
         setColumnVisibility(updater);
       },
-      onSortingChange: setSorting,
       onColumnSizingChange: setColumnSizingChange,
       onColumnFiltersChange: setColumnFilters,
       getFilteredRowModel: getFilteredRowModel(),
       state: {
         columnSizing,
-        sorting,
+        sorting: columnSorting,
         columnVisibility,
         columnOrder,
         columnFilters,
       },
     }),
-    [columns, columnVisibility, columnOrder, columnFilters, sorting, data, columnSizing],
+    [columns, columnVisibility, columnOrder, columnFilters, columnSorting, data, columnSizing],
   );
   const table = useReactTable(tableOptions);
+
+  const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
+    const newSortingState = updater instanceof Function ? updater(columnSorting) : updater;
+    const localStorageData = {
+      columnSizing,
+      columnVisibility,
+      columnOrder,
+      columnSorting: newSortingState,
+    };
+    // Save newSortingState to localStorage
+    if (stateDS) {
+      stateDS.setValue(null, localStorageData);
+      emit('onsavestate');
+    }
+    if (saveState) {
+      localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
+    }
+
+    setColumnSorting(updater);
+  };
+  //since this table option is derived from table row model state, we're using the table.setOptions utility
+  table.setOptions((prev) => ({
+    ...prev,
+    onSortingChange: handleSortingChange,
+  }));
 
   // reorder columns after drag & drop
   const handleDragEnd = (event: DragEndEvent) => {
@@ -224,6 +254,7 @@ const Pagination = ({
           columnVisibility,
           columnSizing,
           columnOrder: newColumnOrder,
+          columnSorting,
         };
         if (stateDS) {
           stateDS.setValue(null, localStorageData);
@@ -300,10 +331,10 @@ const Pagination = ({
     const updateDataFromSorting = async () => {
       if (datasource.dataType === 'array') {
         let dsValue = await datasource.getValue();
-        loadArray(dsValue, sorting);
+        loadArray(dsValue, columnSorting);
       } else {
-        if (sorting.length > 0) {
-          const sortingString = sorting
+        if (columnSorting.length > 0) {
+          const sortingString = columnSorting
             .map(
               ({ id: columnId, desc: isDescending }) =>
                 `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
@@ -320,7 +351,7 @@ const Pagination = ({
     };
     setLoading(true);
     updateDataFromSorting();
-  }, [currentPage, pageSize, sorting, selection.selectedPage]);
+  }, [currentPage, pageSize, columnSorting, selection.selectedPage]);
 
   // handle selelctElement
   const currentDsChangeHandler = useCallback(async () => {
