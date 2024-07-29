@@ -37,6 +37,7 @@ import {
   updateEntity,
 } from '../hooks/useDsChangeHandler';
 import isNumber from 'lodash/isNumber';
+import orderBy from 'lodash/orderBy';
 
 interface Data {
   length: number;
@@ -121,7 +122,15 @@ const InfiniteScroll = ({
     //manage array case (display+sorting)
     const displayArray = async () => {
       if (datasource.dataType === 'array') {
-        const dsValue = await datasource.getValue();
+        let dsValue = await datasource.getValue();
+        if (sorting.length > 0) {
+          dsValue = orderBy(
+            dsValue,
+            sorting.map((e) => e.id),
+            sorting.map((e) => (e.desc ? 'desc' : 'asc')),
+          );
+        }
+
         setDataToDisplay(dsValue);
       }
     };
@@ -380,7 +389,7 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     const updateDataFromSorting = async () => {
