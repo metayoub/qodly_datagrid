@@ -63,6 +63,12 @@ The DataGrid component can respond to various events, enabling dynamic user expe
 - **On MouseOver**: Calls for an action when the user's mouse cursor is over the area of the component.
 - **On SaveState**: Calls for an action when the user change the component's state.
 
+## Pagination mode:
+
+By default, the datasource's page size is set to 100. To set the initial value of your datagrid's page size, you need to go the edition section of your datasource, and set it from there.
+
+![pagination](public/pageSize.png)
+
 ## Styling
 
 you can easily restyle your table using by creating a CSS class and bind it to your table

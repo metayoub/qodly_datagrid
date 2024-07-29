@@ -130,7 +130,7 @@ const InfiniteScroll = ({
             sorting.map((e) => (e.desc ? 'desc' : 'asc')),
           );
         }
-
+        setLoading(false);
         setDataToDisplay(dsValue);
       }
     };
