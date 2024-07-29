@@ -47,7 +47,7 @@ const CustomCell = ({
           : value;
       // const customStyle = format ? getStyle(dataType as DataType, format, value) : {};
 
-      return <div /*style={customStyle}*/>{customValue}</div>;
+      return <div /*style={customStyle}*/ className="cell whitespace-nowrap">{customValue}</div>;
   }
 };
 
