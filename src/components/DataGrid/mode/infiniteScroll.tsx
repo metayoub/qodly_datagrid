@@ -37,6 +37,7 @@ import {
   updateEntity,
 } from '../hooks/useDsChangeHandler';
 import isNumber from 'lodash/isNumber';
+import orderBy from 'lodash/orderBy';
 
 interface Data {
   length: number;
@@ -116,6 +117,26 @@ const InfiniteScroll = ({
       emit('onheaderclick', params);
     },
   );
+
+  useEffect(() => {
+    //manage array case (display+sorting)
+    const displayArray = async () => {
+      if (datasource.dataType === 'array') {
+        let dsValue = await datasource.getValue();
+        if (sorting.length > 0) {
+          dsValue = orderBy(
+            dsValue,
+            sorting.map((e) => e.id),
+            sorting.map((e) => (e.desc ? 'desc' : 'asc')),
+          );
+        }
+
+        setDataToDisplay(dsValue);
+      }
+    };
+
+    displayArray();
+  }, [datasource, sorting]);
 
   useEffect(() => {
     const getValue = async () => {
@@ -368,25 +389,29 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     const updateDataFromSorting = async () => {
-      const { id: columnId, desc: isDescending } = sorting[0];
-      // Sorting is an object [desc: boolean, id: string]
-      // workaround until the fix is delivered
-      await (datasource?.orderBy as any)(`${columnId} ${isDescending ? 'desc' : 'asc'}`, {
-        first: 0,
-        size: pageSize,
-      }).then((value: any) => {
-        setData({
-          length: value._private.selLength,
-          start: value._private.curPage.first,
-          end: value._private.curPage.first + value._private.curPage.size,
+      const sortingString = sorting
+        .map(
+          ({ id: columnId, desc: isDescending }) => `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
+        )
+        .join(',');
+      await datasource
+        .orderBy(sortingString, {
+          first: 0,
+          size: pageSize,
+        })
+        .then((value: any) => {
+          setData({
+            length: value._private.selLength,
+            start: value._private.curPage.first,
+            end: value._private.curPage.first + value._private.curPage.size,
+          });
+          setDataToDisplay(value._private.curPage.entitiesDef);
+          setLoading(false);
         });
-        setDataToDisplay(value._private.curPage.entitiesDef);
-        setLoading(false);
-      });
       // TODO: Select the first Element
     };
 
@@ -397,14 +422,14 @@ const InfiniteScroll = ({
   }, [sorting]);
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     loader.sourceHasChanged().then(() => updateFromLoader(true));
   }, [loader]);
 
   useEffect(() => {
-    if (!datasource) {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
     const cb = async () => {
@@ -437,7 +462,7 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
 
