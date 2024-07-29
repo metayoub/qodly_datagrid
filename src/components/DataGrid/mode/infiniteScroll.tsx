@@ -82,7 +82,7 @@ const InfiniteScroll = ({
   const [data, setData] = useState<Data>({ length: 0, start: 0, end: 0 });
   const [dataToDisplay, setDataToDisplay] = useState<datasources.IEntity[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnSorting, setColumnSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
@@ -123,11 +123,11 @@ const InfiniteScroll = ({
     const displayArray = async () => {
       if (datasource.dataType === 'array') {
         let dsValue = await datasource.getValue();
-        if (sorting.length > 0) {
+        if (columnSorting.length > 0) {
           dsValue = orderBy(
             dsValue,
-            sorting.map((e) => e.id),
-            sorting.map((e) => (e.desc ? 'desc' : 'asc')),
+            columnSorting.map((e) => e.id),
+            columnSorting.map((e) => (e.desc ? 'desc' : 'asc')),
           );
         }
 
@@ -136,7 +136,7 @@ const InfiniteScroll = ({
     };
 
     displayArray();
-  }, [datasource, sorting]);
+  }, [datasource, columnSorting]);
 
   useEffect(() => {
     const getValue = async () => {
@@ -145,14 +145,17 @@ const InfiniteScroll = ({
         if (dsValue.columnVisibility) setColumnVisibility(dsValue.columnVisibility);
         if (dsValue.columnOrder) setColumnOrder(dsValue.columnOrder);
         if (dsValue.columnSizing) setColumnSizing(dsValue.columnSizing);
+        if (dsValue.columnSorting) setColumnSorting(dsValue.columnSorting);
       } else if (saveState) {
         // Load table settings from localStorage in case it not saved in DB
         const savedSettings = localStorage.getItem(`tableSettings_${id}`);
         if (savedSettings) {
-          const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
+          const { columnVisibility, columnOrder, columnSizing, columnSorting } =
+            JSON.parse(savedSettings);
           setColumnVisibility(columnVisibility);
           setColumnOrder(columnOrder);
           setColumnSizing(columnSizing || {});
+          setColumnSorting(columnSorting);
         }
       }
     };
@@ -165,6 +168,7 @@ const InfiniteScroll = ({
       columnSizing: newColumnSizeState,
       columnVisibility,
       columnOrder,
+      columnSorting,
     };
     // Save newVisibilityState to localStorage
     if (stateDS) {
@@ -194,6 +198,7 @@ const InfiniteScroll = ({
           columnVisibility: newVisibilityState,
           columnOrder,
           columnSizing,
+          columnSorting,
         };
         // Save newVisibilityState to localStorage
         if (stateDS) {
@@ -210,13 +215,21 @@ const InfiniteScroll = ({
       onColumnSizingChange: setColumnSizingChange,
       state: {
         columnSizing,
-        sorting,
+        sorting: columnSorting,
         columnVisibility,
         columnOrder,
         columnFilters,
       },
     };
-  }, [dataToDisplay, columnVisibility, columns, columnOrder, sorting, columnFilters, columnSizing]);
+  }, [
+    dataToDisplay,
+    columnVisibility,
+    columns,
+    columnOrder,
+    columnSorting,
+    columnFilters,
+    columnSizing,
+  ]);
 
   const table = useReactTable(tableOptions);
   const pageSize = useMemo(() => (datasource as any).pageSize, [datasource]);
@@ -236,7 +249,23 @@ const InfiniteScroll = ({
   });
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
-    setSorting(updater);
+    const newSortingState = updater instanceof Function ? updater(columnSorting) : updater;
+    const localStorageData = {
+      columnSizing,
+      columnVisibility,
+      columnOrder,
+      columnSorting: newSortingState,
+    };
+    // Save newSortingState to localStorage
+    if (stateDS) {
+      stateDS.setValue(null, localStorageData);
+      emit('onsavestate');
+    }
+    if (saveState) {
+      localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
+    }
+
+    setColumnSorting(updater);
     if (!!table.getRowModel().rows.length) {
       rowVirtualizer.scrollToIndex(0);
     }
@@ -346,6 +375,7 @@ const InfiniteScroll = ({
           columnVisibility,
           columnSizing,
           columnOrder: newColumnOrder,
+          columnSorting,
         };
         if (stateDS) {
           stateDS.setValue(null, localStorageData);
@@ -393,7 +423,7 @@ const InfiniteScroll = ({
       return;
     }
     const updateDataFromSorting = async () => {
-      const sortingString = sorting
+      const sortingString = columnSorting
         .map(
           ({ id: columnId, desc: isDescending }) => `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
         )
@@ -415,11 +445,11 @@ const InfiniteScroll = ({
       // TODO: Select the first Element
     };
 
-    if (sorting.length > 0) {
+    if (columnSorting.length > 0) {
       setLoading(true);
       updateDataFromSorting();
     }
-  }, [sorting]);
+  }, [columnSorting]);
 
   useEffect(() => {
     if (!loader || !datasource || datasource.dataType === 'array') {
