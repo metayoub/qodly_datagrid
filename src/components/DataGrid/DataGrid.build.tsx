@@ -95,20 +95,14 @@ const DataGrid: FC<IDataGridProps> = ({
       }}
       className={cn(className, classNames)}
     >
-      {columnsVisibility && <TableVisibility table={table} disabled={true} />}
-      <div className="block max-w-full overflow-x-scroll overflow-y-hidden">
+      <div className="relative overflow-auto block">
+        {columnsVisibility && <TableVisibility table={table} disabled={true} />}
         {datasource ? (
           ColumnsAux.length > 0 && data ? (
-            <table
-              {...{
-                style: {
-                  width: table.getCenterTotalSize(),
-                },
-              }}
-            >
+            <table className="w-full">
               <thead className="header bg-gray-50">
                 {table.getHeaderGroups().map((headerGroup) => (
-                  <tr key={headerGroup.id}>
+                  <tr key={headerGroup.id} className="">
                     {headerGroup.headers.map((header) => (
                       <th
                         className={`th-${header.column.id} text-left`}
@@ -129,9 +123,13 @@ const DataGrid: FC<IDataGridProps> = ({
               </thead>
               <tbody className="body">
                 {table.getRowModel().rows.map((row) => (
-                  <tr key={row.id} style={{ height: rowHeight }}>
+                  <tr key={row.id} className="tr-body" style={{ height: rowHeight }}>
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className={`td-${cell.column.id}`}>
+                      <td
+                        key={cell.id}
+                        className={`td-${cell.column.id}`}
+                        style={{ width: cell.column.getSize() }}
+                      >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
                     ))}
@@ -143,7 +141,7 @@ const DataGrid: FC<IDataGridProps> = ({
                   {table.getFooterGroups().map((footerGroup) => (
                     <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>
                       {footerGroup.headers.map((header) => (
-                        <th key={header.id}>
+                        <th key={header.id} style={{ width: header.getSize() }}>
                           {flexRender(header.column.columnDef.footer, header.getContext())}
                         </th>
                       ))}

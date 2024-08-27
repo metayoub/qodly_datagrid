@@ -241,10 +241,10 @@ const InfiniteScroll = ({
     estimateSize: () => rowHeight, //estimate row height for accurate scrollbar dragging
     getScrollElement: () => tableContainerRef.current,
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
-    measureElement:
+    /*measureElement:
       typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
         ? (element: any) => element?.getBoundingClientRect().height
-        : undefined,
+        : undefined,*/
     overscan: 10,
   });
 
@@ -532,60 +532,59 @@ const InfiniteScroll = ({
 
   return (
     <div
-      className="container relative overflow-auto block s"
+      className="relative overflow-auto"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
       style={{
         height: height, //should be a fixed height // TODO: make it dynamic
       }}
     >
-      <DndContext
-        collisionDetection={closestCenter}
-        modifiers={[restrictToHorizontalAxis]}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-      >
-        {columnsVisibility && <TableVisibility table={table} />}
-        {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
-        <table className="grid w-full">
-          <TableHeader
-            infinite={true}
-            table={table}
-            headerHeight={headerHeight}
-            filter={filter}
-            columnOrder={columnOrder}
-            handleHeaderClick={handleHeaderClick}
-          />
-          <tbody
-            className="relative grid"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
-            }}
-          >
-            <TableBodyScroll
+      {columnsVisibility && <TableVisibility table={table} />}
+      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+        <DndContext
+          collisionDetection={closestCenter}
+          modifiers={[restrictToHorizontalAxis]}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
+          <table className="w-full">
+            <TableHeader
+              infinite={true}
               table={table}
-              rowHeight={rowHeight}
+              headerHeight={headerHeight}
+              filter={filter}
               columnOrder={columnOrder}
-              onRowClick={async (row) => {
-                await updateCurrentDsValue({ index: row.index });
-                emit('onselect', row.original);
-                setSelectedIndex(row.index);
-              }}
-              rowVirtualizer={rowVirtualizer}
-              selectedIndex={selectedIndex}
-              oncellclick={handleCellClick}
-              onMouseEnter={({ rowIndex, source, value }) => {
-                emit('oncellmouseenter', {
-                  row: rowIndex,
-                  name: source,
-                  value,
-                });
-              }}
+              handleHeaderClick={handleHeaderClick}
             />
-          </tbody>
-          {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
-        </table>
-      </DndContext>
+            <tbody className="body">
+              <TableBodyScroll
+                table={table}
+                rowHeight={rowHeight}
+                columnOrder={columnOrder}
+                onRowClick={async (row) => {
+                  await updateCurrentDsValue({ index: row.index });
+                  emit('onselect', row.original);
+                  setSelectedIndex(row.index);
+                }}
+                rowVirtualizer={rowVirtualizer}
+                selectedIndex={selectedIndex}
+                oncellclick={handleCellClick}
+                onMouseEnter={({ rowIndex, source, value }) => {
+                  emit('oncellmouseenter', {
+                    row: rowIndex,
+                    name: source,
+                    value,
+                  });
+                }}
+              />
+            </tbody>
+            {false && displayFooter && (
+              <TableFooter table={table} columnOrder={columnOrder} infinite={true} />
+            )}
+          </table>
+        </DndContext>
+      </div>
     </div>
   );
 };

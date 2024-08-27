@@ -14,7 +14,7 @@ const TableFooter = ({
   return (
     <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50`}>
       {table.getFooterGroups().map((footerGroup) => (
-        <tr key={footerGroup.id} className={`flex tf-${footerGroup.id}`}>
+        <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
           {footerGroup.headers.map((header) => (
             <SortableContext
               key={header.id}
