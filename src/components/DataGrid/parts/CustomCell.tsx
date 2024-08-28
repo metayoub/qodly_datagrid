@@ -38,6 +38,8 @@ const CustomCell = ({
       return value ? <MdCheck /> : <MdClose />;
     case dataType === 'number' && typeof value === 'number' && format === 'slider':
       return <input type="range" value={value} disabled />;
+    case dataType === 'bool' && typeof value === 'boolean' && format === 'boolean':
+      return <div className="cell">{value.toString()}</div>;
     default:
       const customValue =
         value !== undefined && value !== null

@@ -36,7 +36,7 @@ const DraggableTableHeader = ({
       }}
       key={header.id}
       colSpan={header.colSpan}
-      className={`th-${header.column.id} flex relative whitespace-nowrap`}
+      className={`th-${header.column.id} relative whitespace-nowrap`}
       style={{
         width: header.column.getSize(),
         height: headerHeight,

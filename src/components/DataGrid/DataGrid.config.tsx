@@ -10,6 +10,7 @@ import {
 import { MdGridOn } from 'react-icons/md';
 import capitalize from 'lodash/capitalize';
 import cloneDeep from 'lodash/cloneDeep';
+import findIndex from 'lodash/findIndex';
 import DataGridSettings, { BasicSettings } from './DataGrid.settings';
 import { generate } from 'short-uuid';
 
@@ -142,34 +143,35 @@ export default {
             ) {
               new_props.currentElement = getDataTransferSourceID(item);
             } else {
-              new_props.columns = [
-                ...(new_props.columns || []),
-                {
-                  title: capitalize(item.attribute.name),
-                  source: item.attribute.name,
-                  width: 150,
-                  sorting: false,
-                  hidden: true,
-                  sizing: true,
-                  id: generate(),
-                  ...(item.attribute.type === 'image'
-                    ? {
-                        dataType: item.attribute.type,
-                      }
-                    : item.attribute.type === 'bool'
+              if (findIndex(new_props.columns, { source: item.attribute.name }) === -1)
+                new_props.columns = [
+                  ...(new_props.columns || []),
+                  {
+                    title: capitalize(item.attribute.name),
+                    source: item.attribute.name,
+                    width: 150,
+                    sorting: false,
+                    hidden: true,
+                    sizing: true,
+                    id: generate(),
+                    ...(item.attribute.type === 'image'
                       ? {
                           dataType: item.attribute.type,
-                          format: 'boolean',
-                          // TODO : Add Formatting
                         }
-                      : ['blob', 'object'].includes(item.attribute.type)
-                        ? {}
-                        : {
-                            format: '',
+                      : item.attribute.type === 'bool'
+                        ? {
                             dataType: item.attribute.type,
-                          }),
-                } as any,
-              ];
+                            format: 'boolean',
+                            // TODO : Add Formatting
+                          }
+                        : ['blob', 'object'].includes(item.attribute.type)
+                          ? {}
+                          : {
+                              format: '',
+                              dataType: item.attribute.type,
+                            }),
+                  } as any,
+                ];
             }
           }
         });
