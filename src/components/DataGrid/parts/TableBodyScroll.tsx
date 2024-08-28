@@ -38,20 +38,20 @@ const TableBodyScroll = ({
     value: any;
   }) => void;
 }) => {
-  return rowVirtualizer.getVirtualItems().map((virtualRow) => {
-    const { rows } = table.getRowModel();
+  const { rows } = table.getRowModel();
+  return rowVirtualizer.getVirtualItems().map((virtualRow, index) => {
     const row = rows[virtualRow.index];
     return (
       <tr
-        data-index={virtualRow.index} //needed for dynamic row height measurement
-        ref={(node) => rowVirtualizer.measureElement(node)} //measure dynamic row height
         key={row.id}
+        /*data-index={virtualRow.index} //needed for dynamic row height measurement
+        ref={(node) => rowVirtualizer.measureElement(node)}*/
         style={{
           height: rowHeight,
-          transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
+          transform: `translateY(${virtualRow.start - index * virtualRow.size}px)`,
         }}
         // remove className and use only style
-        className={cn(`flex absolute w-full tr-${virtualRow.index}`, {
+        className={cn(`tr-${virtualRow.index}`, {
           selected: selectedIndex === virtualRow.index,
           'bg-blue-100': selectedIndex === virtualRow.index,
         })}

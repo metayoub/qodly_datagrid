@@ -37,6 +37,7 @@ import {
   updateEntity,
 } from '../hooks/useDsChangeHandler';
 import isNumber from 'lodash/isNumber';
+import orderBy from 'lodash/orderBy';
 
 interface Data {
   length: number;
@@ -81,7 +82,7 @@ const InfiniteScroll = ({
   const [data, setData] = useState<Data>({ length: 0, start: 0, end: 0 });
   const [dataToDisplay, setDataToDisplay] = useState<datasources.IEntity[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnSorting, setColumnSorting] = useState<SortingState>([]);
   const [columnOrder, setColumnOrder] = useState<string[]>(
     columns.map((column) => column.id as string),
   );
@@ -118,20 +119,43 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
+    //manage array case (display+sorting)
+    const displayArray = async () => {
+      if (datasource.dataType === 'array') {
+        let dsValue = await datasource.getValue();
+        if (columnSorting.length > 0) {
+          dsValue = orderBy(
+            dsValue,
+            columnSorting.map((e) => e.id),
+            columnSorting.map((e) => (e.desc ? 'desc' : 'asc')),
+          );
+        }
+        setLoading(false);
+        setDataToDisplay(dsValue);
+      }
+    };
+
+    displayArray();
+  }, [datasource, columnSorting]);
+
+  useEffect(() => {
     const getValue = async () => {
       if (stateDS) {
         const dsValue = await stateDS?.value;
         if (dsValue.columnVisibility) setColumnVisibility(dsValue.columnVisibility);
         if (dsValue.columnOrder) setColumnOrder(dsValue.columnOrder);
         if (dsValue.columnSizing) setColumnSizing(dsValue.columnSizing);
+        if (dsValue.columnSorting) setColumnSorting(dsValue.columnSorting);
       } else if (saveState) {
         // Load table settings from localStorage in case it not saved in DB
         const savedSettings = localStorage.getItem(`tableSettings_${id}`);
         if (savedSettings) {
-          const { columnVisibility, columnOrder, columnSizing } = JSON.parse(savedSettings);
+          const { columnVisibility, columnOrder, columnSizing, columnSorting } =
+            JSON.parse(savedSettings);
           setColumnVisibility(columnVisibility);
           setColumnOrder(columnOrder);
           setColumnSizing(columnSizing || {});
+          setColumnSorting(columnSorting);
         }
       }
     };
@@ -144,6 +168,7 @@ const InfiniteScroll = ({
       columnSizing: newColumnSizeState,
       columnVisibility,
       columnOrder,
+      columnSorting,
     };
     // Save newVisibilityState to localStorage
     if (stateDS) {
@@ -173,6 +198,7 @@ const InfiniteScroll = ({
           columnVisibility: newVisibilityState,
           columnOrder,
           columnSizing,
+          columnSorting,
         };
         // Save newVisibilityState to localStorage
         if (stateDS) {
@@ -189,13 +215,21 @@ const InfiniteScroll = ({
       onColumnSizingChange: setColumnSizingChange,
       state: {
         columnSizing,
-        sorting,
+        sorting: columnSorting,
         columnVisibility,
         columnOrder,
         columnFilters,
       },
     };
-  }, [dataToDisplay, columnVisibility, columns, columnOrder, sorting, columnFilters, columnSizing]);
+  }, [
+    dataToDisplay,
+    columnVisibility,
+    columns,
+    columnOrder,
+    columnSorting,
+    columnFilters,
+    columnSizing,
+  ]);
 
   const table = useReactTable(tableOptions);
   const pageSize = useMemo(() => (datasource as any).pageSize, [datasource]);
@@ -207,15 +241,31 @@ const InfiniteScroll = ({
     estimateSize: () => rowHeight, //estimate row height for accurate scrollbar dragging
     getScrollElement: () => tableContainerRef.current,
     //measure dynamic row height, except in firefox because it measures table border height incorrectly
-    measureElement:
+    /*measureElement:
       typeof window !== 'undefined' && navigator.userAgent.indexOf('Firefox') === -1
         ? (element: any) => element?.getBoundingClientRect().height
-        : undefined,
+        : undefined,*/
     overscan: 10,
   });
 
   const handleSortingChange: OnChangeFn<SortingState> = (updater) => {
-    setSorting(updater);
+    const newSortingState = updater instanceof Function ? updater(columnSorting) : updater;
+    const localStorageData = {
+      columnSizing,
+      columnVisibility,
+      columnOrder,
+      columnSorting: newSortingState,
+    };
+    // Save newSortingState to localStorage
+    if (stateDS) {
+      stateDS.setValue(null, localStorageData);
+      emit('onsavestate');
+    }
+    if (saveState) {
+      localStorage.setItem(`tableSettings_${id}`, JSON.stringify(localStorageData));
+    }
+
+    setColumnSorting(updater);
     if (!!table.getRowModel().rows.length) {
       rowVirtualizer.scrollToIndex(0);
     }
@@ -324,6 +374,7 @@ const InfiniteScroll = ({
           columnVisibility,
           columnSizing,
           columnOrder: newColumnOrder,
+          columnSorting,
         };
         if (stateDS) {
           stateDS.setValue(null, localStorageData);
@@ -367,43 +418,47 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     const updateDataFromSorting = async () => {
-      const { id: columnId, desc: isDescending } = sorting[0];
-      // Sorting is an object [desc: boolean, id: string]
-      // workaround until the fix is delivered
-      await (datasource?.orderBy as any)(`${columnId} ${isDescending ? 'desc' : 'asc'}`, {
-        first: 0,
-        size: pageSize,
-      }).then((value: any) => {
-        setData({
-          length: value._private.selLength,
-          start: value._private.curPage.first,
-          end: value._private.curPage.first + value._private.curPage.size,
+      const sortingString = columnSorting
+        .map(
+          ({ id: columnId, desc: isDescending }) => `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
+        )
+        .join(',');
+      await datasource
+        .orderBy(sortingString, {
+          first: 0,
+          size: pageSize,
+        })
+        .then((value: any) => {
+          setData({
+            length: value._private.selLength,
+            start: value._private.curPage.first,
+            end: value._private.curPage.first + value._private.curPage.size,
+          });
+          setDataToDisplay(value._private.curPage.entitiesDef);
+          setLoading(false);
         });
-        setDataToDisplay(value._private.curPage.entitiesDef);
-        setLoading(false);
-      });
       // TODO: Select the first Element
     };
 
-    if (sorting.length > 0) {
+    if (columnSorting.length > 0) {
       setLoading(true);
       updateDataFromSorting();
     }
-  }, [sorting]);
+  }, [columnSorting]);
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
     loader.sourceHasChanged().then(() => updateFromLoader(true));
   }, [loader]);
 
   useEffect(() => {
-    if (!datasource) {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
     const cb = async () => {
@@ -435,7 +490,7 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!loader || !datasource || datasource.dataType === 'array') {
       return;
     }
 
@@ -475,60 +530,59 @@ const InfiniteScroll = ({
 
   return (
     <div
-      className="container relative overflow-auto block s"
+      className="relative overflow-auto"
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
       style={{
         height: height, //should be a fixed height // TODO: make it dynamic
       }}
     >
-      <DndContext
-        collisionDetection={closestCenter}
-        modifiers={[restrictToHorizontalAxis]}
-        onDragEnd={handleDragEnd}
-        sensors={sensors}
-      >
-        {columnsVisibility && <TableVisibility table={table} />}
-        {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
-        <table className="grid w-full">
-          <TableHeader
-            infinite={true}
-            table={table}
-            headerHeight={headerHeight}
-            filter={filter}
-            columnOrder={columnOrder}
-            handleHeaderClick={handleHeaderClick}
-          />
-          <tbody
-            className="relative grid"
-            style={{
-              height: `${rowVirtualizer.getTotalSize()}px`, //tells scrollbar how big the table is
-            }}
-          >
-            <TableBodyScroll
+      {columnsVisibility && <TableVisibility table={table} />}
+      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+        <DndContext
+          collisionDetection={closestCenter}
+          modifiers={[restrictToHorizontalAxis]}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+        >
+          {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
+          <table className="w-full">
+            <TableHeader
+              infinite={true}
               table={table}
-              rowHeight={rowHeight}
+              headerHeight={headerHeight}
+              filter={filter}
               columnOrder={columnOrder}
-              onRowClick={async (row) => {
-                await updateCurrentDsValue({ index: row.index });
-                emit('onselect', row.original);
-                setSelectedIndex(row.index);
-              }}
-              rowVirtualizer={rowVirtualizer}
-              selectedIndex={selectedIndex}
-              oncellclick={handleCellClick}
-              onMouseEnter={({ rowIndex, source, value }) => {
-                emit('oncellmouseenter', {
-                  row: rowIndex,
-                  name: source,
-                  value,
-                });
-              }}
+              handleHeaderClick={handleHeaderClick}
             />
-          </tbody>
-          {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
-        </table>
-      </DndContext>
+            <tbody className="body">
+              <TableBodyScroll
+                table={table}
+                rowHeight={rowHeight}
+                columnOrder={columnOrder}
+                onRowClick={async (row) => {
+                  await updateCurrentDsValue({ index: row.index });
+                  emit('onselect', row.original);
+                  setSelectedIndex(row.index);
+                }}
+                rowVirtualizer={rowVirtualizer}
+                selectedIndex={selectedIndex}
+                oncellclick={handleCellClick}
+                onMouseEnter={({ rowIndex, source, value }) => {
+                  emit('oncellmouseenter', {
+                    row: rowIndex,
+                    name: source,
+                    value,
+                  });
+                }}
+              />
+            </tbody>
+            {false && displayFooter && (
+              <TableFooter table={table} columnOrder={columnOrder} infinite={true} />
+            )}
+          </table>
+        </DndContext>
+      </div>
     </div>
   );
 };

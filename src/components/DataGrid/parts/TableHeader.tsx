@@ -25,9 +25,9 @@ const TableHeader = ({
   ) => void;
 }) => {
   return (
-    <thead className={`header grid ${infinite && 'sticky top-0 z-10'} bg-gray-50`}>
+    <thead className={`header ${infinite && 'sticky top-0 z-10'} bg-gray-50`}>
       {table.getHeaderGroups().map((headerGroup) => (
-        <tr key={headerGroup.id} className="flex w-full">
+        <tr key={headerGroup.id}>
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
               <DraggableTableHeader
