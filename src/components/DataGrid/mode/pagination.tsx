@@ -341,23 +341,8 @@ const Pagination = ({
           await datasource.orderBy(sortingString);
         }
         await loader.fetchPage((currentPage - 1) * pageSize).then(updateFromLoader);
-        /*await loader
-          .fetchPage((currentPage - 1) * pageSize, currentPage * pageSize)
-          .then(updateFromLoader);*/
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
-
-      /*if (sorting.length > 0) {
-        const sortingString = sorting
-          .map(
-            ({ id: columnId, desc: isDescending }) =>
-              `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
-          )
-          .join(',');
-        await datasource.orderBy(sortingString);
-      }
-      // TODO: calculate the new position of the selected element and fetch the page with the new position
-      await loader.fetchPage((currentPage - 1) * pageSize).then(updateFromLoader);*/
       // await currentDsNewPosition();
     };
     setLoading(true);
