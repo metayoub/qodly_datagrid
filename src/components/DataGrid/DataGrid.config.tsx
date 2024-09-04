@@ -192,8 +192,6 @@ export default {
     state: '',
     variant: 'infinite',
     style: {
-      width: 'fit-content',
-      maxWidth: '100%',
       overflowX: 'auto',
       overflowY: 'auto',
       height: '600px',
