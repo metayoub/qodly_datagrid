@@ -195,6 +195,7 @@ export default {
       overflowX: 'auto',
       overflowY: 'auto',
       height: '600px',
+      width: 'fit-content',
     },
   },
 } as T4DComponentConfig<IDataGridProps>;
