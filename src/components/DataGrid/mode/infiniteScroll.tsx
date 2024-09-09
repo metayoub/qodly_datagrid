@@ -540,7 +540,13 @@ const InfiniteScroll = ({
       }}
     >
       {columnsVisibility && <TableVisibility table={table} />}
-      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          position: 'relative',
+          minHeight: '100%',
+        }}
+      >
         <DndContext
           collisionDetection={closestCenter}
           modifiers={[restrictToHorizontalAxis]}

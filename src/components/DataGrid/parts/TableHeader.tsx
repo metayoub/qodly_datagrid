@@ -30,18 +30,20 @@ const TableHeader = ({
         <tr key={headerGroup.id}>
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
-              <DraggableTableHeader
-                key={header.id}
-                header={header}
-                headerHeight={headerHeight}
-                filter={filter}
-                table={table}
-                handleHeaderClick={handleHeaderClick}
-              >
-                {false && filter && header.column.getCanFilter() && (
-                  <TableFilter column={header.column} table={table} />
-                )}
-              </DraggableTableHeader>
+              <th style={{ minWidth: header.column.getSize(), width: header.column.getSize() }}>
+                <DraggableTableHeader
+                  key={header.id}
+                  header={header}
+                  headerHeight={headerHeight}
+                  filter={filter}
+                  table={table}
+                  handleHeaderClick={handleHeaderClick}
+                >
+                  {false && filter && header.column.getCanFilter() && (
+                    <TableFilter column={header.column} table={table} />
+                  )}
+                </DraggableTableHeader>
+              </th>
             ))}
           </SortableContext>
         </tr>
