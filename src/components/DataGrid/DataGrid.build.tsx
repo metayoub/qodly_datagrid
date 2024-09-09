@@ -113,6 +113,7 @@ const DataGrid: FC<IDataGridProps> = ({
                           style: {
                             height: headerHeight,
                             width: header.getSize(),
+                            minWidth: header.getSize(),
                           },
                         }}
                       >
@@ -129,7 +130,7 @@ const DataGrid: FC<IDataGridProps> = ({
                       <td
                         key={cell.id}
                         className={`td-${cell.column.id}`}
-                        style={{ width: cell.column.getSize() }}
+                        style={{ width: cell.column.getSize(), minWidth: cell.column.getSize() }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
@@ -142,7 +143,10 @@ const DataGrid: FC<IDataGridProps> = ({
                   {table.getFooterGroups().map((footerGroup) => (
                     <tr key={footerGroup.id} className={`tf-${footerGroup.id} text-left`}>
                       {footerGroup.headers.map((header) => (
-                        <th key={header.id} style={{ width: header.getSize() }}>
+                        <th
+                          key={header.id}
+                          style={{ width: header.getSize(), minWidth: header.getSize() }}
+                        >
                           {flexRender(header.column.columnDef.footer, header.getContext())}
                         </th>
                       ))}
