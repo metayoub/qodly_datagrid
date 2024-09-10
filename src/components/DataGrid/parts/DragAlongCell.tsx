@@ -54,6 +54,7 @@ const DragAlongCell = ({
         width: cell.column.getSize(),
         minWidth: cell.column.getSize(),
         zIndex: isDragging ? 1 : 0,
+        flexGrow: 1,
       }}
       className={`td-${cell.column.id} content-center overflow-hidden`}
       ref={setNodeRef}

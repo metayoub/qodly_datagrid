@@ -563,7 +563,7 @@ const InfiniteScroll = ({
           />
           {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
           <table className="w-full relative">
-            <tbody className="body">
+            <tbody className="body flex-row">
               <TableBodyScroll
                 table={table}
                 rowHeight={rowHeight}

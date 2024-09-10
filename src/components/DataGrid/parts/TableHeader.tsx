@@ -25,12 +25,18 @@ const TableHeader = ({
   ) => void;
 }) => {
   return (
-    <thead className={`header ${infinite && 'sticky top-0 z-10'} bg-gray-50`}>
+    <thead className={`header ${infinite && 'sticky top-0 z-10'} bg-gray-50 flex`}>
       {table.getHeaderGroups().map((headerGroup) => (
-        <tr key={headerGroup.id}>
+        <tr key={headerGroup.id} className="header-group flex grow bg-gray-50">
           <SortableContext items={columnOrder} strategy={horizontalListSortingStrategy}>
             {headerGroup.headers.map((header) => (
-              <th style={{ minWidth: header.column.getSize(), width: header.column.getSize() }}>
+              <th
+                style={{
+                  minWidth: header.column.getSize(),
+                  width: header.column.getSize(),
+                  flexGrow: 1,
+                }}
+              >
                 <DraggableTableHeader
                   key={header.id}
                   header={header}

@@ -12,13 +12,17 @@ const TableFooter = ({
   infinite?: boolean;
 }) => {
   return (
-    <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50`}>
+    <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50 flex`}>
       {table.getFooterGroups().map((footerGroup) => (
-        <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
+        <tr key={footerGroup.id} className={`tf-${footerGroup.id} flex grow bg-gray-50`}>
           {footerGroup.headers.map((header) => (
             <td
               key={header.id}
-              style={{ minWidth: header.column.getSize(), width: header.column.getSize() }}
+              style={{
+                minWidth: header.column.getSize(),
+                width: header.column.getSize(),
+                flexGrow: 1,
+              }}
             >
               <SortableContext
                 key={header.id}

@@ -452,7 +452,7 @@ const Pagination = ({
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <table className="w-full">
+          <table className="w-full flex-row">
             <TableHeader
               table={table}
               headerHeight={headerHeight}
@@ -460,7 +460,7 @@ const Pagination = ({
               columnOrder={columnOrder}
               handleHeaderClick={handleHeaderClick}
             />
-            <tbody className="body">
+            <tbody className="body flex-row">
               {loading ? (
                 <tr>
                   <td colSpan={100}>
