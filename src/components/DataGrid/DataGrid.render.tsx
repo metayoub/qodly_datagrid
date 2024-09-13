@@ -119,6 +119,7 @@ const DataGrid: FC<IDataGridProps> = ({
         ...style,
         height: variant === 'pagination' ? 'fit-content' : style?.height,
         minWidth: '225px',
+        maxWidth: '100%',
       }}
       className={cn(className, classNames)}
     >

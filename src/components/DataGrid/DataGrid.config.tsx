@@ -192,8 +192,10 @@ export default {
     state: '',
     variant: 'infinite',
     style: {
-      width: 'fit-content',
+      overflowX: 'auto',
+      overflowY: 'auto',
       height: '600px',
+      width: 'fit-content',
     },
   },
 } as T4DComponentConfig<IDataGridProps>;

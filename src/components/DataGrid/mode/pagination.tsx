@@ -452,7 +452,7 @@ const Pagination = ({
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <table className="w-full">
+          <table className="w-full flex-row">
             <TableHeader
               table={table}
               headerHeight={headerHeight}
@@ -460,7 +460,7 @@ const Pagination = ({
               columnOrder={columnOrder}
               handleHeaderClick={handleHeaderClick}
             />
-            <tbody className="body">
+            <tbody className="body flex-row">
               {loading ? (
                 <tr>
                   <td colSpan={100}>
@@ -492,16 +492,16 @@ const Pagination = ({
             </tbody>
             {displayFooter && <TableFooter table={table} columnOrder={columnOrder} />}
           </table>
-          <TablePagination
-            table={table}
-            total={total}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-          />
         </DndContext>
       </div>
+      <TablePagination
+        table={table}
+        total={total}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
+      />
     </div>
   );
 };

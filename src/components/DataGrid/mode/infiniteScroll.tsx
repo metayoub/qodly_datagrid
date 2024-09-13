@@ -540,24 +540,30 @@ const InfiniteScroll = ({
       }}
     >
       {columnsVisibility && <TableVisibility table={table} />}
-      <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: 'relative' }}>
+      <div
+        style={{
+          height: `${rowVirtualizer.getTotalSize()}px`,
+          position: 'relative',
+          minHeight: '100%',
+        }}
+      >
         <DndContext
           collisionDetection={closestCenter}
           modifiers={[restrictToHorizontalAxis]}
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
+          <TableHeader
+            infinite={true}
+            table={table}
+            headerHeight={headerHeight}
+            filter={filter}
+            columnOrder={columnOrder}
+            handleHeaderClick={handleHeaderClick}
+          />
           {loading && <div className="loading z-11 fixed opacity-50">⏳</div>}
-          <table className="w-full">
-            <TableHeader
-              infinite={true}
-              table={table}
-              headerHeight={headerHeight}
-              filter={filter}
-              columnOrder={columnOrder}
-              handleHeaderClick={handleHeaderClick}
-            />
-            <tbody className="body">
+          <table className="w-full relative">
+            <tbody className="body flex-row">
               <TableBodyScroll
                 table={table}
                 rowHeight={rowHeight}
@@ -579,12 +585,10 @@ const InfiniteScroll = ({
                 }}
               />
             </tbody>
-            {false && displayFooter && (
-              <TableFooter table={table} columnOrder={columnOrder} infinite={true} />
-            )}
           </table>
         </DndContext>
       </div>
+      {displayFooter && <TableFooter table={table} columnOrder={columnOrder} infinite={true} />}
     </div>
   );
 };

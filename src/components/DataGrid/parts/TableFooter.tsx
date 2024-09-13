@@ -12,17 +12,26 @@ const TableFooter = ({
   infinite?: boolean;
 }) => {
   return (
-    <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50`}>
+    <tfoot className={`footer ${infinite && 'sticky bottom-0 z-10'} text-left bg-gray-50 flex`}>
       {table.getFooterGroups().map((footerGroup) => (
-        <tr key={footerGroup.id} className={`tf-${footerGroup.id}`}>
+        <tr key={footerGroup.id} className={`tf-${footerGroup.id} flex grow bg-gray-50`}>
           {footerGroup.headers.map((header) => (
-            <SortableContext
+            <td
               key={header.id}
-              items={columnOrder}
-              strategy={horizontalListSortingStrategy}
+              style={{
+                minWidth: header.column.getSize(),
+                width: header.column.getSize(),
+                flexGrow: 1,
+              }}
             >
-              <DragAlongFooter key={header.id} header={header} />
-            </SortableContext>
+              <SortableContext
+                key={header.id}
+                items={columnOrder}
+                strategy={horizontalListSortingStrategy}
+              >
+                <DragAlongFooter key={header.id} header={header} />
+              </SortableContext>
+            </td>
           ))}
         </tr>
       ))}
