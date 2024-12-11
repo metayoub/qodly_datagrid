@@ -315,7 +315,7 @@ const InfiniteScroll = ({
     }
 
     setLoading(true);
-    loader.fetchPage(start).then(() => {
+    loader.fetchPage(start, pageSize).then(() => {
       updateFromLoader();
       setLoading(false);
     });
@@ -462,7 +462,7 @@ const InfiniteScroll = ({
       return;
     }
     const cb = async () => {
-      await loader.fetchPage(0).then(() => updateFromLoader(true));
+      await loader.fetchPage(0, pageSize).then(() => updateFromLoader(true));
     };
 
     datasource.addListener('changed', cb);

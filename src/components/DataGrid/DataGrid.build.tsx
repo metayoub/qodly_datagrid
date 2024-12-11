@@ -1,4 +1,4 @@
-import { useEnhancedNode } from '@ws-ui/webform-editor';
+import { useEnhancedNode, useDatasourceSub } from '@ws-ui/webform-editor';
 import cn from 'classnames';
 import { FC, useEffect, useState } from 'react';
 import {
@@ -28,6 +28,8 @@ const DataGrid: FC<IDataGridProps> = ({
   const {
     connectors: { connect },
   } = useEnhancedNode();
+
+  useDatasourceSub();
 
   const calculateHeight = (height: string | number | undefined): number => {
     /* make it dynamic for inifinite scroll*/
