@@ -24,18 +24,19 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader, unsubscribeFromDatasource, useWebformPath } from '@ws-ui/webform-editor';
+import {
+  DataLoader,
+  unsubscribeFromDatasource,
+  useWebformPath,
+  updateEntity,
+} from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBodyScroll, TableFooter } from '../parts';
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
-import {
-  findIndexByRefOrValue,
-  getParentEntitySel,
-  updateEntity,
-} from '../hooks/useDsChangeHandler';
+import { findIndexByRefOrValue, getParentEntitySel } from '../hooks/useDsChangeHandler';
 import isNumber from 'lodash/isNumber';
 import orderBy from 'lodash/orderBy';
 

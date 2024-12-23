@@ -24,15 +24,16 @@ import {
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { DataLoader, unsubscribeFromDatasource, useWebformPath } from '@ws-ui/webform-editor';
+import {
+  DataLoader,
+  unsubscribeFromDatasource,
+  useWebformPath,
+  updateEntity,
+} from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
 import { TEmit } from '@ws-ui/webform-editor/dist/hooks/use-emit';
-import {
-  findIndexByRefOrValue,
-  getParentEntitySel,
-  updateEntity,
-} from '../hooks/useDsChangeHandler';
+import { findIndexByRefOrValue, getParentEntitySel } from '../hooks/useDsChangeHandler';
 import orderBy from 'lodash/orderBy';
 
 const Pagination = ({
