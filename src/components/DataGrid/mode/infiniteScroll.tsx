@@ -40,12 +40,6 @@ import { findIndexByRefOrValue, getParentEntitySel } from '../hooks/useDsChangeH
 import isNumber from 'lodash/isNumber';
 import orderBy from 'lodash/orderBy';
 
-interface Data {
-  length: number;
-  start: number;
-  end: number;
-}
-
 const InfiniteScroll = ({
   columns,
   datasource,
@@ -77,8 +71,7 @@ const InfiniteScroll = ({
 }) => {
   //we need a reference to the scrolling element for logic down below
   const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const [data, setData] = useState<Data>({ length: 0, start: 0, end: 0 });
+  const [reset, setReset] = useState(false);
   const [dataToDisplay, setDataToDisplay] = useState<datasources.IEntity[]>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSorting, setColumnSorting] = useState<SortingState>([]);
@@ -92,12 +85,9 @@ const InfiniteScroll = ({
   const path = useWebformPath();
   const stateDS = window.DataSource.getSource(state, path);
 
-  const { entities, fetchIndex } = useDataLoader({
+  const { entities, fetchIndex, page } = useDataLoader({
     source: datasource,
   });
-
-  console.log(entities);
-
   const emitCellEvent = (
     eventName: string,
     { source, rowIndex }: { source: string; rowIndex: number },
@@ -314,19 +304,6 @@ const InfiniteScroll = ({
     }
   };
 
-  // TODO: to be tested
-  const fetchItems = (start: number) => {
-    if (!datasource) {
-      return;
-    }
-    console.log('fetchItems');
-    setLoading(true);
-    // loader.fetchPage(start, pageSize).then(() => {
-    //   updateFromLoader();
-    //   setLoading(false);
-    // });
-  };
-
   const currentDsNewPosition = async () => {
     if (!currentElement) {
       return;
@@ -401,30 +378,6 @@ const InfiniteScroll = ({
     useSensor(KeyboardSensor, {}),
   );
 
-  const updateFromLoader = useCallback(
-    (reset?: boolean) => {
-      if (!datasource) {
-        return;
-      }
-
-      console.log('updateFromLoader');
-      // if (reset) {
-      //   setDataToDisplay(loader.page);
-      // } else {
-      //   setDataToDisplay((prev) => {
-      //     return [...prev, ...loader.page];
-      //   });
-      // }
-      // setData({
-      //   length: loader.length,
-      //   start: loader.start,
-      //   end: loader.end,
-      // });
-      setLoading(false);
-    },
-    [datasource],
-  );
-
   useEffect(() => {
     if (!datasource || datasource.dataType === 'array') {
       return;
@@ -435,20 +388,11 @@ const InfiniteScroll = ({
           ({ id: columnId, desc: isDescending }) => `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
         )
         .join(',');
-      await datasource
-        .orderBy(sortingString, {
-          first: 0,
-          size: pageSize,
-        })
-        .then((value: any) => {
-          setData({
-            length: value._private.selLength,
-            start: value._private.curPage.first,
-            end: value._private.curPage.first + value._private.curPage.size,
-          });
-          setDataToDisplay(value._private.curPage.entitiesDef);
-          setLoading(false);
-        });
+      setReset(true);
+      await datasource.orderBy(sortingString, {
+        first: 0,
+        size: pageSize,
+      });
       // TODO: Select the first Element
     };
 
@@ -462,21 +406,8 @@ const InfiniteScroll = ({
     if (!datasource || datasource.dataType === 'array') {
       return;
     }
-    const fetch = async () => {
-      console.log('datasource changed');
-      datasource.filterAttributesText = [
-        ...(datasource.filterAttributesText || '').split(','),
-        ...columns.map((col) => col.id),
-      ]
-        .filter((v, i, a) => a.indexOf(v) === i && v)
-        .join(',');
-      await fetchIndex(0);
-      updateFromLoader(true);
-    };
 
-    fetch();
-
-    // loader.sourceHasChanged().then(() => updateFromLoader(true));
+    fetchIndex(0);
   }, []);
 
   useEffect(() => {
@@ -484,8 +415,7 @@ const InfiniteScroll = ({
       return;
     }
     const cb = async () => {
-      console.log('datasource cb');
-      // await loader.fetchPage(0, pageSize).then(() => updateFromLoader(true));
+      await fetchIndex(0);
     };
 
     datasource.addListener('changed', cb);
@@ -502,29 +432,43 @@ const InfiniteScroll = ({
         const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
         if (
           !loading &&
+          !page.fetching &&
           scrollHeight - scrollTop - clientHeight < 500 &&
-          data.end - data.start - 1 < pageSize
+          page.end - page.start - 1 < pageSize
         ) {
-          await fetchItems(data.end);
+          setReset(false);
+          await fetchIndex(page.end);
         }
       }
     },
-    [data, pageSize, loading],
+    [pageSize, loading],
   );
+
+  useEffect(() => {
+    if (page.fetching) {
+      return;
+    }
+    if (reset) {
+      setDataToDisplay(entities);
+    } else {
+      setDataToDisplay((prev) => {
+        return [...prev, ...entities];
+      });
+    }
+    setLoading(false);
+  }, [entities]);
 
   useEffect(() => {
     if (!datasource || datasource.dataType === 'array') {
       return;
     }
 
-    const dsListener = () => {
-      console.log('datasource dsListener');
-      // loader.sourceHasChanged().then(() => {
-      //   updateFromLoader(true);
-      //   if (isNumber(selectedIndex) && selectedIndex > -1) {
-      //     currentDsNewPosition();
-      //   }
-      // });
+    const dsListener = async () => {
+      await fetchIndex(0);
+      // TODO: check if it's working
+      if (isNumber(selectedIndex) && selectedIndex > -1) {
+        currentDsNewPosition();
+      }
     };
     datasource.addListener('changed', dsListener);
     return () => {

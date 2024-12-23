@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   getCoreRowModel,
   SortingState,
@@ -25,10 +25,10 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import {
-  DataLoader,
   unsubscribeFromDatasource,
   useWebformPath,
   updateEntity,
+  useDataLoader,
 } from '@ws-ui/webform-editor';
 import { useDoubleClick } from '../hooks/useDoubleClick';
 import { TableVisibility, TableHeader, TableBody, TablePagination, TableFooter } from '../parts';
@@ -44,7 +44,6 @@ const Pagination = ({
   filter,
   datasource,
   columns,
-  loader,
   currentElement,
   saveState,
   state = '',
@@ -59,7 +58,6 @@ const Pagination = ({
   datasource: datasources.DataSource;
   currentElement: datasources.DataSource;
   columns: ColumnDef<any, any>[];
-  loader?: DataLoader;
   saveState: boolean;
   state?: string;
   emit: TEmit;
@@ -67,10 +65,11 @@ const Pagination = ({
 }) => {
   const [data, setData] = useState<datasources.IEntity[]>([]);
   const [total, setTotal] = useState(0);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(
     datasource.getPageSize() != 0 ? datasource.getPageSize() : 10,
   );
+  const sortingRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
@@ -92,6 +91,10 @@ const Pagination = ({
       value: value,
     });
   };
+  const { entities, fetchPage, page } = useDataLoader({
+    source: datasource,
+  });
+
   const handleCellClick = useDoubleClick<{ source: string; rowIndex: number; value: any }>(
     (_, params) => {
       emitCellEvent('oncelldblclick', params);
@@ -115,7 +118,7 @@ const Pagination = ({
     }
 
     const cb = async () => {
-      await loader.fetchPage((currentPage - 1) * pageSize, pageSize).then(updateFromLoader);
+      await fetchPage((currentPage - 1) * pageSize, pageSize);
     };
 
     datasource.addListener('changed', cb);
@@ -274,32 +277,6 @@ const Pagination = ({
     useSensor(KeyboardSensor, {}),
   );
 
-  useEffect(() => {
-    if (!currentElement) {
-      return;
-    }
-    // Get The selected element position
-    currentDsChangeHandler();
-  }, []);
-
-  const updateFromLoader = useCallback(() => {
-    if (!loader) {
-      return;
-    }
-    if (currentPage === 0) {
-      setCurrentPage(1);
-      setSelection((prev) => ({ ...prev, selectedPage: 1 }));
-      return;
-    }
-    if (loader.length < pageSize) {
-      //search-> go back to page 1 to see rows..
-      setCurrentPage(1);
-    }
-    setData(loader.page);
-    setTotal(loader.length);
-    setLoading(false);
-  }, [loader, currentPage]);
-
   const loadArray = (dsValue: any, sorting: SortingState) => {
     if (sorting.length > 0) {
       dsValue = orderBy(
@@ -323,11 +300,11 @@ const Pagination = ({
   };
 
   useEffect(() => {
-    if (!loader || !datasource) {
+    if (!datasource) {
       return;
     }
 
-    const updateDataFromSorting = async () => {
+    const fetch = async () => {
       if (datasource.dataType === 'array') {
         let dsValue = await datasource.getValue();
         loadArray(dsValue, columnSorting);
@@ -339,58 +316,21 @@ const Pagination = ({
                 `${columnId} ${isDescending ? 'DESC' : 'ASC'}`,
             )
             .join(',');
-          await datasource.orderBy(sortingString);
+          await datasource.orderBy(sortingString, {
+            first: (currentPage - 1) * pageSize,
+            size: pageSize,
+          });
+          sortingRef.current = true;
+        } else {
+          await fetchPage((currentPage - 1) * pageSize, pageSize);
         }
-
-        await loader.fetchPage((currentPage - 1) * pageSize, pageSize).then(updateFromLoader);
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
       // await currentDsNewPosition();
     };
     setLoading(true);
-    updateDataFromSorting();
-  }, [currentPage, pageSize, columnSorting, selection.selectedPage]);
-
-  // handle selelctElement
-  const currentDsChangeHandler = useCallback(async () => {
-    if (!currentElement) {
-      return;
-    }
-    switch (currentElement.type) {
-      case 'entity': {
-        const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
-        const entity = (currentElement as any).getEntity();
-        if (entity) {
-          let currentIndex = entity.getPos();
-          if (currentIndex == null && parent) {
-            // used "==" to handle both null & undefined values
-            currentIndex = await parent.findElementPosition(currentElement);
-          }
-          if (typeof currentIndex === 'number') {
-            setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
-            selectIndex(currentIndex % pageSize, Math.floor(currentIndex / pageSize) + 1);
-          }
-        } else {
-          selectIndex(-1);
-        }
-        break;
-      }
-      case 'scalar': {
-        if (!datasource || datasource.dataType !== 'array') {
-          return;
-        }
-        const items = await datasource.getValue();
-        const value = await currentElement.getValue();
-        const currentIndex = findIndexByRefOrValue(items, value);
-        if (currentIndex >= 0) {
-          selectIndex(currentIndex);
-        } else {
-          selectIndex(-1);
-        }
-        break;
-      }
-    }
-  }, [currentElement, loader]); // do we need loader here?
+    fetch();
+  }, [currentPage, pageSize, columnSorting]);
 
   const updateCurrentDsValue = async ({
     index,
@@ -434,11 +374,74 @@ const Pagination = ({
     if (!currentElement) {
       return;
     }
+
+    const currentDsChangeHandler = async () => {
+      if (!currentElement || sortingRef.current) {
+        sortingRef.current = false;
+        return;
+      }
+
+      switch (currentElement.type) {
+        case 'entity': {
+          const parent =
+            getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
+          const entity = (currentElement as any).getEntity();
+          if (entity) {
+            let currentIndex = entity.getPos();
+            if (currentIndex == null && parent) {
+              currentIndex = await parent.findElementPosition(currentElement);
+            }
+            console.log('currentIndex', entity.getPos());
+            if (typeof currentIndex === 'number') {
+              setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
+              selectIndex(currentIndex % pageSize, Math.floor(currentIndex / pageSize) + 1);
+            }
+          } else {
+            selectIndex(-1);
+          }
+          break;
+        }
+        case 'scalar': {
+          if (!datasource || datasource.dataType !== 'array') {
+            return;
+          }
+          const items = await datasource.getValue();
+          const value = await currentElement.getValue();
+          const currentIndex = findIndexByRefOrValue(items, value);
+          if (currentIndex >= 0) {
+            selectIndex(currentIndex);
+          } else {
+            selectIndex(-1);
+          }
+          break;
+        }
+      }
+    };
+
     currentElement.addListener('changed', currentDsChangeHandler);
     return () => {
       currentElement.removeListener('changed', currentDsChangeHandler);
     };
-  }, [currentDsChangeHandler]);
+  }, []);
+
+  useEffect(() => {
+    if (!datasource || datasource.dataType === 'array') {
+      return;
+    }
+    const fetchTotal = async () => {
+      setTotal(await datasource.getValue('length'));
+    };
+    fetchTotal();
+  }, []);
+
+  useEffect(() => {
+    if (!datasource || datasource.dataType === 'array' || page.fetching) {
+      return;
+    }
+
+    setData(entities);
+    setLoading(false);
+  }, [entities]);
 
   return (
     <div className="block max-w-full">
