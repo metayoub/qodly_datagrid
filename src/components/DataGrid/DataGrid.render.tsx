@@ -1,10 +1,9 @@
 import { useRenderer, useSources, useEnhancedNode } from '@ws-ui/webform-editor';
 import cn from 'classnames';
-import { FC, useMemo } from 'react';
+import { FC } from 'react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { IColumn, IDataGridProps } from './DataGrid.config';
 import './DataGrid.css';
-import { DataLoader } from '@ws-ui/webform-editor';
 import { useDoubleClick } from './hooks/useDoubleClick';
 import { CustomCell } from './parts';
 import Pagination from './mode/pagination';
@@ -19,6 +18,7 @@ declare global {
 }
 const DataGrid: FC<IDataGridProps> = ({
   columns = [],
+  datasource,
   displayFooter = true,
   rowHeight,
   headerHeight,
@@ -101,16 +101,6 @@ const DataGrid: FC<IDataGridProps> = ({
     },
   );
 
-  const loader = useMemo<DataLoader | null>(() => {
-    if (!ds) {
-      return null;
-    }
-    return DataLoader.create(
-      ds,
-      columns.map(({ source }) => source.trim()),
-    );
-  }, [columns, ds]);
-
   return (
     <div
       ref={connect}
@@ -123,11 +113,10 @@ const DataGrid: FC<IDataGridProps> = ({
       }}
       className={cn(className, classNames)}
     >
-      {loader ? (
+      {datasource ? (
         <>
           {variant === 'pagination' ? (
             <Pagination
-              loader={loader}
               displayFooter={displayFooter}
               rowHeight={rowHeight}
               headerHeight={headerHeight}
@@ -153,7 +142,6 @@ const DataGrid: FC<IDataGridProps> = ({
               filter={filter}
               saveState={saveState}
               state={state}
-              loader={loader}
               currentElement={currentElement}
               emit={emit}
               id={id}

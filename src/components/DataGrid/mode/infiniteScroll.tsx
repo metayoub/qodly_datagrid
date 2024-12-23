@@ -25,7 +25,7 @@ import {
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import {
-  DataLoader,
+  useDataLoader,
   unsubscribeFromDatasource,
   useWebformPath,
   updateEntity,
@@ -53,7 +53,6 @@ const InfiniteScroll = ({
   rowHeight,
   headerHeight,
   filter,
-  loader,
   currentElement,
   height = '600px',
   saveState,
@@ -68,7 +67,6 @@ const InfiniteScroll = ({
   rowHeight: number;
   headerHeight: number;
   filter: boolean;
-  loader: DataLoader;
   currentElement: datasources.DataSource;
   height: string | number | undefined;
   saveState: boolean;
@@ -93,6 +91,13 @@ const InfiniteScroll = ({
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const path = useWebformPath();
   const stateDS = window.DataSource.getSource(state, path);
+
+  const { entities, fetchIndex } = useDataLoader({
+    source: datasource,
+  });
+
+  console.log(entities);
+
   const emitCellEvent = (
     eventName: string,
     { source, rowIndex }: { source: string; rowIndex: number },
@@ -311,15 +316,15 @@ const InfiniteScroll = ({
 
   // TODO: to be tested
   const fetchItems = (start: number) => {
-    if (!loader) {
+    if (!datasource) {
       return;
     }
-
+    console.log('fetchItems');
     setLoading(true);
-    loader.fetchPage(start, pageSize).then(() => {
-      updateFromLoader();
-      setLoading(false);
-    });
+    // loader.fetchPage(start, pageSize).then(() => {
+    //   updateFromLoader();
+    //   setLoading(false);
+    // });
   };
 
   const currentDsNewPosition = async () => {
@@ -398,28 +403,30 @@ const InfiniteScroll = ({
 
   const updateFromLoader = useCallback(
     (reset?: boolean) => {
-      if (!loader) {
+      if (!datasource) {
         return;
       }
-      if (reset) {
-        setDataToDisplay(loader.page);
-      } else {
-        setDataToDisplay((prev) => {
-          return [...prev, ...loader.page];
-        });
-      }
-      setData({
-        length: loader.length,
-        start: loader.start,
-        end: loader.end,
-      });
+
+      console.log('updateFromLoader');
+      // if (reset) {
+      //   setDataToDisplay(loader.page);
+      // } else {
+      //   setDataToDisplay((prev) => {
+      //     return [...prev, ...loader.page];
+      //   });
+      // }
+      // setData({
+      //   length: loader.length,
+      //   start: loader.start,
+      //   end: loader.end,
+      // });
       setLoading(false);
     },
-    [loader],
+    [datasource],
   );
 
   useEffect(() => {
-    if (!loader || !datasource || datasource.dataType === 'array') {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
     const updateDataFromSorting = async () => {
@@ -452,18 +459,33 @@ const InfiniteScroll = ({
   }, [columnSorting]);
 
   useEffect(() => {
-    if (!loader || !datasource || datasource.dataType === 'array') {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
-    loader.sourceHasChanged().then(() => updateFromLoader(true));
-  }, [loader]);
+    const fetch = async () => {
+      console.log('datasource changed');
+      datasource.filterAttributesText = [
+        ...(datasource.filterAttributesText || '').split(','),
+        ...columns.map((col) => col.id),
+      ]
+        .filter((v, i, a) => a.indexOf(v) === i && v)
+        .join(',');
+      await fetchIndex(0);
+      updateFromLoader(true);
+    };
+
+    fetch();
+
+    // loader.sourceHasChanged().then(() => updateFromLoader(true));
+  }, []);
 
   useEffect(() => {
     if (!datasource || datasource.dataType === 'array') {
       return;
     }
     const cb = async () => {
-      await loader.fetchPage(0, pageSize).then(() => updateFromLoader(true));
+      console.log('datasource cb');
+      // await loader.fetchPage(0, pageSize).then(() => updateFromLoader(true));
     };
 
     datasource.addListener('changed', cb);
@@ -491,17 +513,18 @@ const InfiniteScroll = ({
   );
 
   useEffect(() => {
-    if (!loader || !datasource || datasource.dataType === 'array') {
+    if (!datasource || datasource.dataType === 'array') {
       return;
     }
 
     const dsListener = () => {
-      loader.sourceHasChanged().then(() => {
-        updateFromLoader(true);
-        if (isNumber(selectedIndex) && selectedIndex > -1) {
-          currentDsNewPosition();
-        }
-      });
+      console.log('datasource dsListener');
+      // loader.sourceHasChanged().then(() => {
+      //   updateFromLoader(true);
+      //   if (isNumber(selectedIndex) && selectedIndex > -1) {
+      //     currentDsNewPosition();
+      //   }
+      // });
     };
     datasource.addListener('changed', dsListener);
     return () => {

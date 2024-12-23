@@ -59,7 +59,7 @@ const Pagination = ({
   datasource: datasources.DataSource;
   currentElement: datasources.DataSource;
   columns: ColumnDef<any, any>[];
-  loader: DataLoader;
+  loader?: DataLoader;
   saveState: boolean;
   state?: string;
   emit: TEmit;
