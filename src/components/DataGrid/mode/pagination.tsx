@@ -119,6 +119,7 @@ const Pagination = ({
 
     const cb = async () => {
       await fetchPage((currentPage - 1) * pageSize, pageSize);
+      setTotal(await datasource.getValue('length'));
     };
 
     datasource.addListener('changed', cb);

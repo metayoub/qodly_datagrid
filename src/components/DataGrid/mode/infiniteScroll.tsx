@@ -463,8 +463,8 @@ const InfiniteScroll = ({
     }
 
     const dsListener = async () => {
+      setReset(true);
       await fetchIndex(0);
-      // TODO: check if it's working
       if (isNumber(selectedIndex) && selectedIndex > -1) {
         currentDsNewPosition();
       }
@@ -473,7 +473,7 @@ const InfiniteScroll = ({
     return () => {
       datasource.removeListener('changed', dsListener);
     };
-  }, [selectedIndex]);
+  }, []);
 
   useEffect(() => {
     const updatePosition = async () => {
