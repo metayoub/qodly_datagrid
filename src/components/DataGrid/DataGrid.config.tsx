@@ -199,7 +199,6 @@ export default {
                         ? {
                             dataType: item.attribute.type,
                             format: 'boolean',
-                            // TODO : Add Formatting
                           }
                         : ['blob', 'object'].includes(item.attribute.type)
                           ? {}

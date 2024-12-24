@@ -273,7 +273,6 @@ const InfiniteScroll = ({
     onSortingChange: handleSortingChange,
   }));
 
-  // TODO: check why is not working
   const updateCurrentDsValue = async ({
     index,
     forceUpdate = false,
@@ -502,7 +501,7 @@ const InfiniteScroll = ({
       onScroll={(e) => fetchMoreOnBottomReached(e.target as HTMLDivElement)}
       ref={tableContainerRef}
       style={{
-        height: height, //should be a fixed height // TODO: make it dynamic
+        height: height, //should be a fixed height
       }}
     >
       {columnsVisibility && <TableVisibility table={table} />}
