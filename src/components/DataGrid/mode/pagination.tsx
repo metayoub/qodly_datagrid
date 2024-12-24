@@ -69,7 +69,7 @@ const Pagination = ({
   const [pageSize, setPageSize] = useState(
     datasource.getPageSize() != 0 ? datasource.getPageSize() : 10,
   );
-  const sortingRef = useRef(false);
+  const updateRef = useRef(false);
   const [loading, setLoading] = useState(true);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [columnSizing, setColumnSizing] = useState<ColumnSizingState>({});
@@ -119,6 +119,7 @@ const Pagination = ({
 
     const cb = async () => {
       await fetchPage((currentPage - 1) * pageSize, pageSize);
+      // TODO: Selected element
     };
 
     datasource.addListener('changed', cb);
@@ -309,6 +310,7 @@ const Pagination = ({
         let dsValue = await datasource.getValue();
         loadArray(dsValue, columnSorting);
       } else {
+        updateRef.current = true;
         if (columnSorting.length > 0) {
           const sortingString = columnSorting
             .map(
@@ -320,13 +322,12 @@ const Pagination = ({
             first: (currentPage - 1) * pageSize,
             size: pageSize,
           });
-          sortingRef.current = true;
         } else {
           await fetchPage((currentPage - 1) * pageSize, pageSize);
         }
       }
       // TODO: calculate the new position of the selected element and fetch the page with the new position
-      // await currentDsNewPosition();
+      // await currentDsChangeHandler();
     };
     setLoading(true);
     fetch();
@@ -370,53 +371,51 @@ const Pagination = ({
     });
   };
 
+  const currentDsChangeHandler = async () => {
+    if (!currentElement || updateRef.current) {
+      updateRef.current = false;
+      return;
+    }
+
+    switch (currentElement.type) {
+      case 'entity': {
+        const parent = getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
+        const entity = (currentElement as any).getEntity();
+        if (entity) {
+          let currentIndex = entity.getPos();
+          if (currentIndex == null && parent) {
+            currentIndex = await parent.findElementPosition(currentElement);
+          }
+          if (typeof currentIndex === 'number') {
+            setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
+            selectIndex(currentIndex % pageSize, Math.floor(currentIndex / pageSize) + 1);
+          }
+        } else {
+          selectIndex(-1);
+        }
+        break;
+      }
+      case 'scalar': {
+        if (!datasource || datasource.dataType !== 'array') {
+          return;
+        }
+        const items = await datasource.getValue();
+        const value = await currentElement.getValue();
+        const currentIndex = findIndexByRefOrValue(items, value);
+        if (currentIndex >= 0) {
+          selectIndex(currentIndex);
+        } else {
+          selectIndex(-1);
+        }
+        break;
+      }
+    }
+  };
+
   useEffect(() => {
     if (!currentElement) {
       return;
     }
-
-    const currentDsChangeHandler = async () => {
-      if (!currentElement || sortingRef.current) {
-        sortingRef.current = false;
-        return;
-      }
-
-      switch (currentElement.type) {
-        case 'entity': {
-          const parent =
-            getParentEntitySel(currentElement, currentElement.dataclassID) || datasource;
-          const entity = (currentElement as any).getEntity();
-          if (entity) {
-            let currentIndex = entity.getPos();
-            if (currentIndex == null && parent) {
-              currentIndex = await parent.findElementPosition(currentElement);
-            }
-            console.log('currentIndex', entity.getPos());
-            if (typeof currentIndex === 'number') {
-              setCurrentPage(Math.floor(currentIndex / pageSize) + 1);
-              selectIndex(currentIndex % pageSize, Math.floor(currentIndex / pageSize) + 1);
-            }
-          } else {
-            selectIndex(-1);
-          }
-          break;
-        }
-        case 'scalar': {
-          if (!datasource || datasource.dataType !== 'array') {
-            return;
-          }
-          const items = await datasource.getValue();
-          const value = await currentElement.getValue();
-          const currentIndex = findIndexByRefOrValue(items, value);
-          if (currentIndex >= 0) {
-            selectIndex(currentIndex);
-          } else {
-            selectIndex(-1);
-          }
-          break;
-        }
-      }
-    };
 
     currentElement.addListener('changed', currentDsChangeHandler);
     return () => {
@@ -442,6 +441,15 @@ const Pagination = ({
     setData(entities);
     setLoading(false);
   }, [entities]);
+
+  useEffect(() => {
+    const updatePositionCurrentElement = async () => {
+      updateRef.current = false;
+      await currentDsChangeHandler();
+    };
+
+    updatePositionCurrentElement();
+  }, []);
 
   return (
     <div className="block max-w-full">

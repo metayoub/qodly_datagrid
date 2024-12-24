@@ -34,7 +34,7 @@ const TableHeader = ({
                 style={{
                   minWidth: header.column.getSize(),
                   width: header.column.getSize(),
-                  flexGrow: 1,
+                  // flexGrow: 1,
                 }}
               >
                 <DraggableTableHeader
