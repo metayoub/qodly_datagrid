@@ -4,7 +4,9 @@ import {
   isDatasourcePayload,
   isAttributePayload,
   getDataTransferSourceID,
+  splitDatasourceID,
   Settings,
+  T4DComponentDatasourceDeclaration,
 } from '@ws-ui/webform-editor';
 
 import { MdGridOn } from 'react-icons/md';
@@ -113,6 +115,41 @@ export default {
       },
     ],
     datasources: {
+      declarations: (props) => {
+        const { columns, currentElement = '', datasource = '' } = props;
+        const declarations: T4DComponentDatasourceDeclaration[] = [
+          { path: datasource, iterable: true },
+        ];
+        if (currentElement) {
+          declarations.push({ path: currentElement });
+        }
+        if (columns) {
+          const { id: ds, namespace } = splitDatasourceID(datasource?.trim()) || {};
+          const { id: currentDs, namespace: currentDsNamespace } =
+            splitDatasourceID(currentElement) || {};
+
+          if (!ds && !currentDs) {
+            return;
+          }
+
+          columns.forEach((col) => {
+            if (currentDs && currentDsNamespace === namespace) {
+              const colSrcID = `${currentDs}.${col.source.trim()}`;
+              declarations.push({
+                path: namespace ? `${namespace}:${colSrcID}` : colSrcID,
+              });
+            }
+            const colSrcID = `${ds}.[].${col.source.trim()}`;
+            const iterable = ds.startsWith('$');
+            declarations.push({
+              path: namespace ? `${namespace}:${colSrcID}` : colSrcID,
+              iterable,
+            });
+          });
+        }
+        return declarations;
+      },
+
       set: (nodeId, query, payload) => {
         const new_props = cloneDeep(query.node(nodeId).get().data.props) as IExostiveElementProps;
         payload.forEach((item) => {
@@ -162,7 +199,6 @@ export default {
                         ? {
                             dataType: item.attribute.type,
                             format: 'boolean',
-                            // TODO : Add Formatting
                           }
                         : ['blob', 'object'].includes(item.attribute.type)
                           ? {}

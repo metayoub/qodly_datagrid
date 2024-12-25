@@ -16,22 +16,21 @@ const TableFooter = ({
       {table.getFooterGroups().map((footerGroup) => (
         <tr key={footerGroup.id} className={`tf-${footerGroup.id} flex grow bg-gray-50`}>
           {footerGroup.headers.map((header) => (
-            <td
+            <SortableContext
               key={header.id}
-              style={{
-                minWidth: header.column.getSize(),
-                width: header.column.getSize(),
-                flexGrow: 1,
-              }}
+              items={columnOrder}
+              strategy={horizontalListSortingStrategy}
             >
-              <SortableContext
+              <DragAlongFooter
                 key={header.id}
-                items={columnOrder}
-                strategy={horizontalListSortingStrategy}
-              >
-                <DragAlongFooter key={header.id} header={header} />
-              </SortableContext>
-            </td>
+                style={{
+                  minWidth: header.column.getSize(),
+                  width: header.column.getSize(),
+                  flexGrow: 1,
+                }}
+                header={header}
+              />
+            </SortableContext>
           ))}
         </tr>
       ))}

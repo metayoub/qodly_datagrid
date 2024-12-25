@@ -2,7 +2,7 @@
   "app_id": "qodly_4800eb8c1261764dafb9",
   "name": "qodly_datagrid",
   "private": true,
-  "version": "0.4.1",
+  "version": "0.6.0",
   "type": "module",
   "author": {
     "name": "Ayoub METWALLI",
@@ -16,30 +16,13 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,jsx,html,css}\""
   },
-  "overrides": {
-    "@ws-ui/webform-editor": {
-      "@ws-ui/code-editor": "0.2.3",
-      "@ws-ui/icons": "0.0.21",
-      "@ws-ui/shared": "0.2.3",
-      "@ws-ui/store": "0.2.4",
-      "@ws-ui/craftjs-core": "0.2.11",
-      "@ws-ui/craftjs-layers": "0.2.4",
-      "@ws-ui/craftjs-utils": "0.2.2"
-    },
-    "@ws-ui/store": {
-      "@ws-ui/icons": "0.0.21"
-    },
-    "@ws-ui/shared": {
-      "@ws-ui/icons": "0.0.21"
-    }
-  },
   "dependencies": {
     "@dnd-kit/core": "^5.0.1",
     "@dnd-kit/modifiers": "^5.0.0",
     "@dnd-kit/sortable": "^6.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@tanstack/react-table": "^8.16.0",
-    "@ws-ui/webform-editor": "0.3.7",
+    "@ws-ui/webform-editor": "0.3.59",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   },
